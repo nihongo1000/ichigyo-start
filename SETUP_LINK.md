@@ -1,10 +1,10 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-13 v6.1（この行が無い古いファイルは使わない）
+版: 2026-11-13 v7.0（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
-最初の文に **合言葉** が入っている。このリポジトリ（公開）には、この指示書と、鍵のかかった部品 `ichigyo_set.enc` だけがある。
-お客さんのパソコンは使わない。お客さんにファイルを扱わせない。
+最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。このリポジトリ（公開）には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
+お客さんのパソコンは使わない。お客さんにファイルを扱わせない。**お客さん用の GitHub の置き場所は作らない（頼まない）。** 記録はお客さんの WordPress の非公開ページ1枚にしまう（`ichigyo_state.py`）。
 
 ## 0. いちばん大事な決まり（どの手順より優先）
 - お客さんはパソコン初心者。専門用語（コマンド、リポジトリ、ブランチ、環境変数、API、Python、セッション など）を使わない。画面に出る言葉は「画面の『〇〇』」とそのまま書く。
@@ -16,55 +16,48 @@
 - **鍵をコピーしてから貼るまでの間は、ほかの文をコピーさせない**（クリップボードの鍵が消える）。
 - 新記事は必ず下書き。公開はお客さん。リライトは案だけ。お客さんが「反映して」と言うまで直さない。
 - ichigyo 本体（`gemini_wordpress_unified.py`）は読まない・書きかえない・まねしない。動かすのは `wp_auto/scripts/ichigyo_cloud_run.py` だけ（`ichigyo_AI_SETUP.md` 1-1c）。
-- 進み具合は、お客さんの預け場所の `ichigyo/STATE.md` に `DONE <章>` で足す。始めるときは必ず読み、終わっていない章から進める。
+- 作業フォルダは `W=/home/user/ichigyo-work`（毎回 R章で作り直す）。進み具合は `$W/ichigyo/STATE.md` に `DONE <章>` で足し、区切りごとに `python3 -I ichigyo_state.py push $W` で WordPress にしまう（`STATE_SAVED` が出ること）。始めるときは必ず R章で取り出して読み、終わっていない章から進める。
+- `ichigyo_AI_SETUP.md` の git・`claude/state`・push・リポジトリの話は、この指示書では「`$W`（手元だけの git、ブランチ claude/state）に commit → `ichigyo_state.py push`」に読みかえる。`not_pushed` の判定は `STATE_SAVED` が出たかで決める。
 
 ## 1. 部品を開ける（何も聞かずに最初にやる）
+R章の手順を、合言葉を最初の文から取って実行する（`ICHIGYO_PASS` がまだ環境に無いため）。この時点では鍵が無いので、R章の 5（記録を取り出す）は飛ばす。`SET_OK` が出なければ、お客さんへ「合言葉が違うようです。購入のときに届いたメールのリンクを、もう一度押してください」とだけ書いて止まる。
+
+## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
+cd "$(git rev-parse --show-toplevel)" && git pull -q 2>/dev/null; R=$(pwd)
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
-cd "$(git rev-parse --show-toplevel)"
 rm -rf /tmp/set && mkdir -p /tmp/set
-export ICHIGYO_PASS='<最初の文の合言葉>'
+# 1. 合言葉：2回目からは環境の ICHIGYO_PASS。初回だけ export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ichigyo_set.enc -out /tmp/set/set.zip -pass env:ICHIGYO_PASS 2>/dev/null
-unset ICHIGYO_PASS
 python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/set')" /tmp/set/set.zip && echo SET_OK
-```
-- 合言葉はコマンドの引数やログに出さない（`env:` で渡す）。`SET_OK` が出なければ、お客さんへ「合言葉が違うようです。購入のときに届いたメールのリンクを、もう一度押してください」とだけ書いて止まる。
-- `S=/tmp/set/ichigyo_SET_v5`（中に `ichigyo_AI_SETUP.md`・`wp_auto/`・リライトMD・ichigyo 本体の zip がある）。
-
-## 2. お客さんの預け場所を作る（お客さんはボタン1つ）
-Claude は GitHub に新しい置き場所を作れない（作る道具は使えない）。だから、作成画面を開くリンクを渡して、お客さんに緑のボタンを1回押してもらう。**3章の質問と同じ1通にまとめる**（往復を増やさない）：
-「1. このリンクを押してください → https://github.com/new?name=ichigyo-auto&visibility=private
-2. 『Private』が選ばれているのを見て、いちばん下の緑の『Create repository』を押してください（名前の下に『already exists』と赤く出たら、もう作ってあるという意味です。その画面は閉じて、そのまま次へ進んでください）」
-- 置き場所がもう有って中身も入っている（前に途中までセットアップした等）場合は、中の `ichigyo/STATE.md` を読んで、DONE になっている所から続ける。中身が ichigyo と関係ない物なら上書きせず、お客さんに名前を ichigyo-auto2 にして作り直してもらう。
-1. 「できた」が来たら `add_repo`（access は push）で付ける。付けられない・押し込めない（権限が無い）と言われたら、お客さんへ1通：「1. このリンクを押してください → https://github.com/settings/installations　2. 『Claude』の行の『Configure』を押す　3. 『Repository access』で『All repositories』を選ぶ（または『Select repositories』で ichigyo-auto を足す）　4. 緑の『Save』を押す（途中で GitHub の本人確認が出たら、メールに届いた数字を入れる）。押したら『できた』と送ってください」
-2. もう一度 `add_repo` して clone する。
-3. 部品を置く（`SETUP_CLOUD.md` v4 の1章と同じ形）：
-```bash
-cd <ichigyo-auto の場所>
-cp -r "$S/wp_auto" ./wp_auto
-mkdir -p tools/rewrite tools/ichigyo ichigyo
-cp "$S"/ichigyo-auto-rewrite-*.md tools/rewrite/
-cp "$S/ichigyo_AI_SETUP.md" <公開リポジトリ>/SETUP_LINK.md ichigyo/
-rm -rf /tmp/ich && python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/ich')" "$S"/wp-ai-auto-ichigyo-*.zip
+S=/tmp/set/ichigyo_SET_v5
+# 2. 作業フォルダ（キットの初期状態）
+W=/home/user/ichigyo-work; rm -rf $W && mkdir -p $W/tools/rewrite $W/ichigyo
+cp -r "$S/wp_auto" $W/wp_auto
+cp "$S"/ichigyo-auto-rewrite-*.md $W/tools/rewrite/
+cp "$S/ichigyo_AI_SETUP.md" "$R/SETUP_LINK.md" $W/ichigyo/
+# 3. ichigyo 本体（15-4 の場所）
+rm -rf /tmp/ich /home/user/ichigyo/tool && python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/ich')" "$S"/wp-ai-auto-ichigyo-*.zip
 T=$(dirname "$(ls /tmp/ich/*/gemini_wordpress_unified.py)")
-mkdir -p wp_auto/fonts && cp "$T/fonts/NotoSansJP-Bold.ttf" wp_auto/fonts/ 2>/dev/null
-tar czf tools/ichigyo/ichigyo_tool.tgz -C "$(dirname "$T")" "$(basename "$T")"
-printf '*.env\n*secret*\n' > .gitignore
-echo "DONE 2" >> ichigyo/STATE.md
-git add -A && git commit -qm "ichigyo の部品を配置" && git push -q -u origin HEAD
+mkdir -p /home/user/ichigyo && cp -r "$T" /home/user/ichigyo/tool && mkdir -p $W/wp_auto/fonts && cp "$T/fonts/NotoSansJP-Bold.ttf" $W/wp_auto/fonts/ 2>/dev/null
+# 4. 手元だけの git（17章のゲート用）
+cd $W && git init -q -b claude/state && printf '*.env\n*secret*\n' > .gitignore && git add -A && git commit -qm base
+# 5. 記録を取り出す（鍵が入ってから。NO_STATE はまだ何もしまっていないだけ）
+python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm restored -q 2>/dev/null || true; }; cat $W/ichigyo/STATE.md 2>/dev/null
 ```
-- 以後、`ichigyo_AI_SETUP.md` の `KIT` はこの預け場所の `wp_auto`、「ichigyo 本体」は `tools/ichigyo/ichigyo_tool.tgz` を毎回 `/home/user/ichigyo/tool` に展開したもの（15-4）。
+- 以後 `ichigyo_AI_SETUP.md` の `KIT` は `$W/wp_auto`、`<リポジトリ>` は `$W`、ichigyo 本体は `/home/user/ichigyo/tool`（15-4 の tar の行は不要。`pip install -r requirements.txt` からでよい）。
+- 15-4 の `image_config.json` など S9 で決めた本体の設定は `$W/tools/ichigyo/` に置き（記録に入る）、毎回 `/home/user/ichigyo/tool` にかぶせる。
+- 終わりは必ず：`cd $W && git add -A && git commit -qm "<何をしたか>"` → `python3 -I "$R/ichigyo_state.py" push $W`（`STATE_SAVED` が出なければ失敗として報告）。
 
-## 3. 最初の1通（1章が終わったらすぐ。2章のボタンと同じ1通）
-「ここから先は私が自動で進めます。〈2章のボタン2つ〉
-次に、5つだけ教えてください。
+## 3. 最初の1通（1章が終わったらすぐ）
+「ここから先は私が自動で進めます。最初に、5つだけ教えてください。
 1. 自動化したいブログのアドレス（例：https://example.com/）
 2. ブログの管理画面にログインするときの名前（ユーザー名。画面に出る名前ではなく、ログインに使う名前）
 3. ブログで書きたいテーマ（例：子育て、料理、副業、旅行）。まだ決まっていなければ「おまかせ」
 4. あなたのこと（例：40代の会社員、2人の子の母、看護師10年）。記事にうそを書かないために使います。書きたくなければ空で大丈夫です
 5. このブログで、ほかの自動投稿のツールを使っていれば、その名前（使っていなければ空で大丈夫です）
-ボタンを押し終えたら、『できた』と5つの答えを下の枠に書いて送ってください」
-- 答えは `ichigyo/ANSWERS.md` に書いて push（鍵ではない）。
+下の枠に書いて送ってください（分かる所だけで大丈夫です）」
+- 答えは4章で環境の設定 `ICHIGYO_ANSWERS` に1行で入れる（例：`テーマ=料理｜自分=40代会社員｜他ツール=なし`。改行・= の後の空白を入れない）。7章で `$W/ichigyo/ANSWERS.md` に書き写す。
 - **ブログを作ったばかり（記事がほとんど無い）でも止めない。** テーマは3の答えで決める。3が「おまかせ」で記事も無いときだけ、もう1通：「どれにしますか。番号で答えてください：①〈4の答えから考えた案〉②〈案〉③〈案〉」（4も空なら、初心者が書きやすい一般的なテーマを3つ）。稼ぎ方（紹介する商品・ASP）は聞かない。テーマに合う一般的な形で Claude が決め、`SITE.md` に書く。
 - 4が空なら、書き手の立場は「このテーマを調べてまとめる人」にし、体験談や資格の話を書かない。5 があれば、最後のあいさつの前に「〈ツール〉を止めてください」と1行で頼む。
 
@@ -72,8 +65,8 @@ git add -A && git commit -qm "ichigyo の部品を配置" && git push -q -u orig
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前「ichigyo 自動運用」（使われていれば「ichigyo 自動運用2」）、scope personal、`switch_session` は none。
    - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`
-   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
-   - repositories：お客さんの `〈owner〉/ichigyo-auto`
+   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。表示しない）、`ICHIGYO_ANSWERS`、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
+   - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
 
@@ -99,18 +92,18 @@ git add -A && git commit -qm "ichigyo の部品を配置" && git push -q -u orig
 
 ## 6. 続きのリンクを渡す（鍵は、あとから始めたセッションにしか入らないため）
 次の形でリンクを作り（値はURL用に変換する）、お客さんへ1通：
-`https://claude.ai/code?environment=<環境の名前>&repositories=<owner>/ichigyo-auto&prompt=ichigyo/SETUP_LINK.md の7章から続けてください。`
+`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=SETUP_LINK.md の7章から続けてください。`
 「最後に、このリンクを押して、出てきた画面で Enter を押してください。そこから先は、その画面の私が仕上げます → 〈リンク〉」
-- このセッションの仕事はここまで。
+- このセッションの仕事はここまで（まだ WordPress の鍵が無いので記録はしまわない。答えは環境の設定に入っている）。
 
 ## 7. 接続の確認（新しいセッション。`ichigyo_AI_SETUP.md` 12章 S8 のゲート）
-- まず `ichigyo/STATE.md` を読む。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
+- まず R章（全部）。`STATE_OK` が出るか `python3 -I ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。`ICHIGYO_ANSWERS` を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - 失敗したとき（1通だけ）：
   - `ENV_MISSING`：多くは、貼った鍵が前の行にくっついている。5章の該当の1通を「いちばん下の行の最後で Enter を押してから貼る」に直して送り、そのあと6章のリンクをもう一度渡す
   - WordPress が 401：「ブログのパスワードが合っていないようです」＋5-1（名前は ichigyo2）→ 6章のリンク
   - 通信できない：`update_environment` で通信先を足す（許可の枠）
-`DONE 7`。
+`DONE 7` → push。
 
 ## 8. ブログに合わせる → 試し記事（`ichigyo_AI_SETUP.md` 5章 S1・13章 S9）
 - `wp_auto/SITE.md`・`wp_auto/config.json` を3章の答えとブログの中身から作る。テーマ・ジャンル・読者・カテゴリはブログを見て自分で決める。サーチコンソールがまだなら `SITE.md` に `SC: なし`。
@@ -118,7 +111,7 @@ git add -A && git commit -qm "ichigyo の部品を配置" && git push -q -u orig
 - 試し運転の前に決める：情報記事の書き方（作り話の体験を書かない）／画像に地図と英語の文字を入れない／人物を1人に固定／アイキャッチは既存記事の形に合わせる／カテゴリは既存に対応／実在しない参考リンクを入れない。
 - **読者に未成年が多いジャンル**なら最初にガードを決め、記事の指示の冒頭に「他のすべてに優先」として書く（恋愛・出会いを出さない、容姿を評価しない、学生服に見える服にしない など）。お金・健康・法律なら断定しない・根拠のない数字を書かない。
 - 試し運転（`--dry-run`、7〜15分。終わるまで待ってから返事）→ テスト記事を1本 **下書き**。お客さんへ：「試しの記事を1本、下書きに入れました。ブログの管理画面の『投稿』→『下書き』で見られます。良ければ、ご自身で『公開』を押してください」
-`DONE 8`。
+`DONE 8` → push。
 
 ## 9. 定期実行（`ichigyo_AI_SETUP.md` 14章 S10）
 **9-0. 回数を聞く（試し記事を見てもらったあとの1通）**
@@ -129,17 +122,17 @@ git add -A && git commit -qm "ichigyo の部品を配置" && git push -q -u orig
 下の枠に書いて、送ってください」
 - 〇円は試し記事の実際の Muse 枚数から出す。
 - 20ドルのプラン（Pro）で「毎日」を選んだら、「使用量の上限に当たる日があるかもしれません」と1行添える。
-- リライトは、サーチコンソールがつながるまでは「案を作って知らせるだけ」。つながっていなければ、リライトの予約は作らずに `STATE.md` に希望の回数を書き、最後のあいさつで「サーチコンソールをつなぐと、リライトも始まります。始めたいときは『リライトもしたい』と送ってください」と添える。
+- リライトは、サーチコンソールがつながるまでは「案を作って知らせるだけ」。つながっていなければ、リライトの予約は作らずに `$W/ichigyo/STATE.md` に希望の回数を書き、最後のあいさつで「サーチコンソールをつなぐと、リライトも始まります。始めたいときは『リライトもしたい』と送ってください」と添える。
 
 **9-1. 作る**
 - 「新記事（9-0 の回数・朝6時台）」と「キーワード補充（日曜。新記事が毎日なら水曜と日曜）」、つながっていれば「リライト（9-0 の回数。新記事と違う曜日・時刻）」。**このセッションに向けて** `create_trigger` で作る。間は1時間以上、分は 00/30 を避ける。時刻はお客さんの国の朝。
-- 指示文の最初に「`ichigyo/SETUP_LINK.md` 0章と `ichigyo_AI_SETUP.md` 15章を読んでから」。
-- 作ったら1回ずつ手動で動かして確かめる。結果を `ichigyo/STATE.md` に書いて push。
+- 指示文の最初に「`SETUP_LINK.md` の0章とR章を読み、R章を実行してから。`$W/ichigyo/ichigyo_AI_SETUP.md` の15〜17章に従う。最後に R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）を必ず行う」。
+- 作ったら1回ずつ手動で動かして確かめる。結果を `$W/ichigyo/STATE.md` に書いて push。
 - 鍵をあとで変えたら、6章の形のリンクで新しいセッションを開いてもらい、そこで定期実行を作り直す。
-`DONE 9`。
+`DONE 9` → push。
 
 ## 10. 最後のあいさつ
-「設定が終わりました。〈曜日〉の朝に、記事が1本ずつ下書きに入ります（回数を変えたいときは、いつでもこの画面で『回数を変えて』と送ってください）（パソコンは消えていても大丈夫です）。下書きはブログの管理画面の『投稿』→『下書き』で確認して、良ければ『公開』を押してください。画像の費用は1本あたり約〇円です」
+「設定が終わりました。〈曜日〉の朝に、記事が1本ずつ下書きに入ります（回数を変えたいときは、いつでもこの画面で『回数を変えて』と送ってください）（パソコンは消えていても大丈夫です）。下書きはブログの管理画面の『投稿』→『下書き』で確認して、良ければ『公開』を押してください。画像の費用は1本あたり約〇円です。ブログの『固定ページ』にある『ichigyo の記録（消さないでください・非公開）』は、設定と記録の保管用なので消さないでください」
 - 3章の5があれば、その前に「〈ツール〉を止めてください（二重に投稿されるため）」。
 
 <!-- END SETUP_LINK -->
