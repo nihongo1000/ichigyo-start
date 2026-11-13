@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-13 v6.0（この行が無い古いファイルは使わない）
+版: 2026-11-13 v6.1（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている。このリポジトリ（公開）には、この指示書と、鍵のかかった部品 `ichigyo_set.enc` だけがある。
@@ -31,9 +31,12 @@ python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/se
 - 合言葉はコマンドの引数やログに出さない（`env:` で渡す）。`SET_OK` が出なければ、お客さんへ「合言葉が違うようです。購入のときに届いたメールのリンクを、もう一度押してください」とだけ書いて止まる。
 - `S=/tmp/set/ichigyo_SET_v5`（中に `ichigyo_AI_SETUP.md`・`wp_auto/`・リライトMD・ichigyo 本体の zip がある）。
 
-## 2. お客さんの預け場所を作る（お客さんは何もしない）
-1. GitHub の道具（`create_repository`）で、お客さんのアカウントに **非公開** の `ichigyo-auto` を作る（あれば `ichigyo-auto2`）。説明文は空。
-2. `add_repo` でこのセッションに付ける。
+## 2. お客さんの預け場所を作る（お客さんはボタン1つ）
+Claude は GitHub に新しい置き場所を作れない（作る道具は使えない）。だから、作成画面を開くリンクを渡して、お客さんに緑のボタンを1回押してもらう。**3章の質問と同じ1通にまとめる**（往復を増やさない）：
+「1. このリンクを押してください → https://github.com/new?name=ichigyo-auto&visibility=private
+2. 『Private』が選ばれているのを見て、いちばん下の緑の『Create repository』を押してください（『already exists』と赤く出たら、名前の欄を ichigyo-auto2 に変えてから押す）」
+1. 「できた」が来たら `add_repo`（access は push）で付ける。付けられない・押し込めない（権限が無い）と言われたら、お客さんへ1通：「1. このリンクを押してください → https://github.com/settings/installations　2. 『Claude』の行の『Configure』を押す　3. 『Repository access』で『All repositories』を選ぶ（または『Select repositories』で ichigyo-auto を足す）　4. 緑の『Save』を押す（途中で GitHub の本人確認が出たら、メールに届いた数字を入れる）。押したら『できた』と送ってください」
+2. もう一度 `add_repo` して clone する。
 3. 部品を置く（`SETUP_CLOUD.md` v4 の1章と同じ形）：
 ```bash
 cd <ichigyo-auto の場所>
@@ -49,17 +52,17 @@ printf '*.env\n*secret*\n' > .gitignore
 echo "DONE 2" >> ichigyo/STATE.md
 git add -A && git commit -qm "ichigyo の部品を配置" && git push -q -u origin HEAD
 ```
-- 作れない・押し込めない（権限が無い）とき：お客さんへ「1. このリンクを押してください → https://github.com/apps/claude/installations/new　2. 自分の名前の行を押し、『All repositories』を選んで、緑の『Install』（すでに入っていれば『Configure』→『All repositories』→『Save』）を押してください。押したら『できた』と送ってください」。そのあと 1 からやり直す。
 - 以後、`ichigyo_AI_SETUP.md` の `KIT` はこの預け場所の `wp_auto`、「ichigyo 本体」は `tools/ichigyo/ichigyo_tool.tgz` を毎回 `/home/user/ichigyo/tool` に展開したもの（15-4）。
 
-## 3. 最初の1通（2章が終わったらすぐ。2章の途中でもよい）
-「ここから先は私が自動で進めます。最初に5つだけ教えてください。
+## 3. 最初の1通（1章が終わったらすぐ。2章のボタンと同じ1通）
+「ここから先は私が自動で進めます。〈2章のボタン2つ〉
+次に、5つだけ教えてください。
 1. 自動化したいブログのアドレス（例：https://example.com/）
 2. ブログの管理画面にログインするときの名前（ユーザー名。画面に出る名前ではなく、ログインに使う名前）
 3. 何を紹介して稼ぐブログか（1行で。分からなければ空でも大丈夫です）
 4. 書き手（あなた）の本当の立場や経歴（1〜2行。記事で話を盛らないために使います。空でも大丈夫です）
 5. このブログを、ほかのツールで自動投稿していたら、その名前（二重に投稿しないように止めます。無ければ空で大丈夫です）
-下の枠に書いて、送ってください」
+ボタンを押し終えたら、『できた』と5つの答えを下の枠に書いて送ってください」
 - 答えは `ichigyo/ANSWERS.md` に書いて push（鍵ではない）。5 があれば、最後のあいさつの前に「〈ツール〉を止めてください」と1行で頼む。
 
 ## 4. 通信の設定を作る（お客さんは許可のボタンだけ）
