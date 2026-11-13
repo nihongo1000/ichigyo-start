@@ -110,7 +110,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 - まず R章（全部）。`STATE_OK` が出るか `python3 -I ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - **ブログのサーバーが海外からのつながりを止めている**（WordPress の確認で 403、または『国外IP』『アクセス制限』の画面が返る）ときは、サーバーの種類を調べて（ネームサーバー・管理画面の作り）、1通で案内する。図解のページができたら、その URL を付ける。
-  - エックスサーバー／シンレンタルサーバー：「1. https://secure.xserver.ne.jp/xapanel/login/xserver/ でログイン → 2.『サーバー管理』→『WordPress』の欄の『WordPressセキュリティ設定』→ 3. 〈ドメイン〉の『選択する』→ 4.『国外IPアクセス制限設定』の『REST API アクセス制限』だけを『OFF』（ほかはそのまま）→ 5.『確認画面へ進む』→『変更する』」
+  - エックスサーバー／シンレンタルサーバー：「1. https://secure.xserver.ne.jp/xapanel/login/xserver/ でログイン → 2.『サーバー管理』→『WordPress』の欄の『WordPressセキュリティ設定』→ 3. 〈ドメイン〉の『選択する』→ 4. 上のタブの『国外アクセス制限』→『REST API アクセス制限』の行だけ『OFFにする』を選ぶ（ほかはそのまま）→ 5. 右下の『設定する』（確認の画面が出たら『変更する』）」
   - そのほか：サーバーの管理画面で『国外』『海外』『REST』の付く設定を探して、REST だけ OFF にしてもらう。
 - 失敗したとき（1通だけ）：
   - `ENV_MISSING`：多くは、貼った鍵が前の行にくっついている。5章の該当の1通を「いちばん下の行の最後で Enter を押してから貼る」に直して送り、そのあと6章のリンクをもう一度渡す
