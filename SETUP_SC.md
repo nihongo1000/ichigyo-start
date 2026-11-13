@@ -22,7 +22,9 @@
 1通ずつ。各通は番号つき・押したら『できた』。
 **2-1.**「1. このリンクを開いてください（ブログと同じ Google アカウントで）→ https://console.cloud.google.com/projectcreate
 2. 初めてなら利用規約が出ます。『同意して続行』を押してください
-3. 『プロジェクト名』に ichigyo-sc と入れて『作成』を押してください」
+3. 『新しいプロジェクト』の画面が出ます。いちばん上の『プロジェクト名』の欄に、最初から『My Project 〇〇〇〇』と入っています。それを消して ichigyo-sc と入れてください
+4. その下の『プロジェクト ID』と『親リソース（組織なし）』は、触らずにそのままで大丈夫です
+5. 青い『作成』を押してください」
 **2-2.**「1. このリンクを開いて、青い『有効にする』を押してください → https://console.cloud.google.com/apis/library/searchconsole.googleapis.com
 （上のプロジェクト名が ichigyo-sc になっているか見てください）」
 **2-3.**「1. このリンクを開いてください → https://console.cloud.google.com/iam-admin/serviceaccounts/create
