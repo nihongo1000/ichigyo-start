@@ -65,7 +65,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 4. あなたのこと（例：40代の会社員、2人の子の母、看護師10年）。記事にうそを書かないために使います。書きたくなければ空で大丈夫です
 5. このブログで、ほかの自動投稿のツールを使っていれば、その名前（使っていなければ空で大丈夫です）
 下の枠に書いて送ってください（分かる所だけで大丈夫です）」
-- 答えは4章で環境の設定 `ICHIGYO_ANSWERS` に1行で入れる（例：`テーマ=料理｜自分=40代会社員｜他ツール=なし`。改行・= の後の空白を入れない。日本語は \u で始まる形に変えず、そのまま書く。許可の枠にそのまま表示され、お客さんが読むため）。7章で `$W/ichigyo/ANSWERS.md` に書き写す。
+- 答えは環境の設定に入れない（許可の枠で日本語が \u の暗号のように見え、お客さんが不安になるため）。1行にまとめて覚えておき（例：`テーマ=料理｜自分=40代会社員｜他ツール=なし`）、6章の続きのリンクの文の最後に `答え: 〈その1行〉` として付ける。7章で `$W/ichigyo/ANSWERS.md` に書き写す。
 - **ブログを作ったばかり（記事がほとんど無い）でも止めない。** テーマは3の答えで決める。3が「おまかせ」で記事も無いときだけ、もう1通：「どれにしますか。番号で答えてください：①〈4の答えから考えた案〉②〈案〉③〈案〉」（4も空なら、初心者が書きやすい一般的なテーマを3つ）。稼ぎ方（紹介する商品・ASP）は聞かない。テーマに合う一般的な形で Claude が決め、`SITE.md` に書く。
 - 4が空なら、書き手の立場は「このテーマを調べてまとめる人」にし、体験談や資格の話を書かない。5 があれば、最後のあいさつの前に「〈ツール〉を止めてください」と1行で頼む。
 
@@ -73,7 +73,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前は「ichigyo 〈ドメイン〉」（例：ichigyo example.com。`https://`・`www.`・最後の / は付けない。ブログが複数になっても見分けられるように。同じ名前が使われていれば、そのブログの続きなので6章のリンクから再開する）。以下この名前を〈環境の名前〉と書く、scope personal、`switch_session` は none。
    - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`、`suggestqueries.google.com`（ichigyo 本体がキーワードの候補を見るため）
-   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。表示しない）、`ICHIGYO_ANSWERS`、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
+   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。表示しない）、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
@@ -100,12 +100,12 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 
 ## 6. 続きのリンクを渡す（鍵は、あとから始めたセッションにしか入らないため）
 次の形でリンクを作り（値はURL用に変換する）、お客さんへ1通：
-`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=SETUP_LINK.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。`
+`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=SETUP_LINK.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉`
 「最後に、このリンクを押して、出てきた画面で Enter を押してください。そこから先は、その画面の私が仕上げます → 〈リンク〉」
-- このセッションの仕事はここまで（まだ WordPress の鍵が無いので記録はしまわない。答えは環境の設定に入っている）。
+- このセッションの仕事はここまで（まだ WordPress の鍵が無いので記録はしまわない。答えはリンクの文に入っている）。
 
 ## 7. 接続の確認（新しいセッション。`ichigyo_AI_SETUP.md` 12章 S8 のゲート）
-- まず R章（全部）。`STATE_OK` が出るか `python3 -I ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。`ICHIGYO_ANSWERS` を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
+- まず R章（全部）。`STATE_OK` が出るか `python3 -I ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - 失敗したとき（1通だけ）：
   - `ENV_MISSING`：多くは、貼った鍵が前の行にくっついている。5章の該当の1通を「いちばん下の行の最後で Enter を押してから貼る」に直して送り、そのあと6章のリンクをもう一度渡す
