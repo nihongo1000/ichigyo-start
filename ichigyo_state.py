@@ -18,6 +18,9 @@ HEAD = "ICHIGYO_STATE_V1"
 KEEP_EXT = (".md", ".csv", ".json", ".txt")
 SKIP_DIRS = {"scripts", "generated", "shots", "fonts", ".git", "tool", "__pycache__"}
 MAX_FILE = 300_000
+# キットの写し（毎回 R章で置き直す）はしまわない。ブログに部品の中身を置かないため
+SKIP_PATHS = {"ichigyo/ichigyo_AI_SETUP.md", "ichigyo/SETUP_LINK.md"}
+SKIP_PREFIX = ("tools/rewrite/",)
 MAX_TOTAL = 4_000_000
 SECRET_VARS = ("WP_APP_PASSWORD", "MUSE_API_KEY", "GSC_SA_JSON", "ICHIGYO_PASS", "RAKKO_API_KEY")
 
@@ -70,6 +73,10 @@ def call(method, route, body=None, query=None):
 def find_page():
     res = call("GET", "pages", query={"slug": SLUG, "status": "private,draft,publish",
                                       "context": "edit", "per_page": 5})
+    if res:
+        return res[0]
+    res = call("GET", "pages", query={"slug": SLUG + "-new", "status": "private,draft",
+                                      "context": "edit", "per_page": 5})
     return res[0] if res else None
 
 
@@ -81,6 +88,9 @@ def pack(work):
             dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
             for f in sorted(files):
                 p = os.path.join(root, f)
+                rel = os.path.relpath(p, work).replace(os.sep, "/")
+                if rel in SKIP_PATHS or rel.startswith(SKIP_PREFIX):
+                    continue
                 if not f.endswith(KEEP_EXT) or os.path.getsize(p) > MAX_FILE:
                     continue
                 total += os.path.getsize(p)
@@ -102,18 +112,21 @@ def push(work):
     blob = pack(work)
     sha = hashlib.sha256(blob).hexdigest()[:16]
     content = f"{HEAD} sha={sha}\n" + base64.b64encode(blob).decode()
-    page = find_page()
-    body = {"title": TITLE, "slug": SLUG, "status": "private", "content": content}
-    if page:
-        call("POST", f"pages/{page['id']}", body)
-    else:
-        page = call("POST", "pages", body)
-    # 読み直して確かめる
-    back = find_page()
+    old = find_page()
+    # 新しいページを作って確かめてから古いページを消す（WordPress の古い版が積み重ならないように）
+    tmp_slug = SLUG + "-new"
+    for p in call("GET", "pages", query={"slug": tmp_slug, "status": "private,draft", "per_page": 5}) or []:
+        call("DELETE", f"pages/{p['id']}", query={"force": "true"})
+    new = call("POST", "pages", {"title": TITLE, "slug": tmp_slug, "status": "private", "content": content})
+    back = call("GET", f"pages/{new['id']}", query={"context": "edit"})
     raw = (back or {}).get("content", {}).get("raw", "")
     if f"sha={sha}" not in raw.split("\n", 1)[0]:
+        call("DELETE", f"pages/{new['id']}", query={"force": "true"})
         die("FAIL state_not_saved")
-    print(f"STATE_SAVED {sha} page={back['id']}")
+    if old:
+        call("DELETE", f"pages/{old['id']}", query={"force": "true"})
+    call("POST", f"pages/{new['id']}", {"slug": SLUG})
+    print(f"STATE_SAVED {sha} page={new['id']} kb={len(content)//1024}")
 
 
 def pull(work):
