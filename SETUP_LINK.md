@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-13 v7.0（この行が無い古いファイルは使わない）
+版: 2026-11-13 v7.1（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。このリポジトリ（公開）には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
@@ -13,6 +13,7 @@
 - お客さんに頼むのは：許可の枠のボタン／GitHub・ブログ・Meta のログイン／カード入力／サイトの「追加」「作成」「コピー」ボタン／鍵を設定の欄に貼って「保存」／Claude が渡すリンクを押して Enter。これ以外は頼まない。
 - **画面に出る文はすべて日本語**（作業中のひとりごと・途中経過も英語にしない。お客さんは全部読む）。
 - 1通に、続けてできる操作を番号つきでまとめる。押したら「できた」と送ってもらう。返事を待つ文はいちばん最後に置く。
+- **新記事は毎回、ichigyo 本体で作ったあとに 8-3 の『日本語の仕上げ』を通す**（試し記事・定期実行・10-1 のどれも）。
 - 作業の中身（ファイル名、件数、手順番号、PASS/FAIL）は書かない。見せるのは「次に押すもの」と「あと何をすれば終わるか」だけ。
 - **合言葉・鍵（パスワード・APIキー）は表示しない・ファイルに書かない・チャットに貼らせない。** 鍵はクラウド環境の設定にだけ置く（お客さんが自分で貼る）。
 - **鍵をコピーしてから貼るまでの間は、ほかの文をコピーさせない**（クリップボードの鍵が消える）。
@@ -52,6 +53,8 @@ mkdir -p /home/user/ichigyo && cp -r "$T" /home/user/ichigyo/tool && mkdir -p $W
 cd $W && git init -q -b claude/state && printf '*.env\n*secret*\n' > .gitignore && git add -A && git commit -qm base
 # 5. 記録を取り出す（鍵が入ってから。NO_STATE はまだ何もしまっていないだけ）
 python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm restored -q 2>/dev/null || true; }; cat $W/ichigyo/STATE.md 2>/dev/null
+# 6. このブログ用の本体の設定（話し方など）をかぶせる
+[ -d $W/tools/ichigyo ] && cp -r $W/tools/ichigyo/. /home/user/ichigyo/tool/ && echo OVERLAY_OK
 ```
 - 以後 `ichigyo_AI_SETUP.md` の `KIT` は `$W/wp_auto`、`<リポジトリ>` は `$W`、ichigyo 本体は `/home/user/ichigyo/tool`（15-4 の tar の行は不要。`pip install -r requirements.txt` からでよい）。
 - 15-4 の `image_config.json` など S9 で決めた本体の設定は `$W/tools/ichigyo/` に置き（記録に入る）、毎回 `/home/user/ichigyo/tool` にかぶせる。
@@ -125,6 +128,19 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 - **参考リンク欄は付けない**：`config_ANIME.json` の `evidence.max_per_article` を 0 にする（クラウドの検索では本物の URL が本体に渡らず、`claude_search_result_1` のような偽のリンクになるため）。投稿の前に必ず `grep -c 'claude_search_result' <本文HTML>` が 0 か確かめ、1以上なら投稿しないでその欄を消してから出す。
 - 試し運転の前に決める：情報記事の書き方（作り話の体験を書かない）／画像に地図と英語の文字を入れない／人物を1人に固定／アイキャッチは既存記事の形に合わせる／カテゴリは既存に対応／実在しない参考リンクを入れない。
 - **読者に未成年が多いジャンル**なら最初にガードを決め、記事の指示の冒頭に「他のすべてに優先」として書く（恋愛・出会いを出さない、容姿を評価しない、学生服に見える服にしない など）。お金・健康・法律なら断定しない・根拠のない数字を書かない。
+**8-2. ブログの話し方を作る（聞かずに・記事が5本以上あるとき）**
+- REST で公開記事を新しい順に30本ほど見て、**人が手で書いたらしい記事を5本**選ぶ（文末や口ぐせが揃いすぎた量産記事・ichigyo の試し記事は選ばない）。選べなければ作らない（本体の標準の話し方で書く）。
+- `/home/user/ichigyo/tool/my_style/` の『あなたの文体スタイル_セットアップ_AIに貼る用.md』の【AIへの指示】のとおりに、その5本から話し方ファイルを作り、`$W/wp_auto/style/ichigyo_日本語ルール.md` 5章のひな形（口ぐせの1万字あたりの実測・記事の流れ・見た目のくせ）を足して `$W/tools/ichigyo/my_style/speech_custom.txt` に保存する。記事の本文や個人名はそのまま写さない（話し方だけ）。
+- 3章の4（あなたのこと）があれば `$W/tools/ichigyo/my_style/settings.json` の `立場` に入れる（`職業・立場`・`読者との関係`・`一人称`。書いていないことは足さない）。空なら立場は未設定のまま。
+- 以後 `ichigyo_cloud_run.py` が自動でこの話し方を使う（ログに `MY_STYLE ON`）。お客さんには何も聞かない・見せない。
+- 終わったら（作らなかったときも）`STATE.md` に `STYLE_DONE <日付>`。**`DONE 8` があるのに `STYLE_DONE` が無いブログ（前の版で設定したブログ）は、次の新記事の前にこの 8-2 を先にやる。**
+
+**8-3. 日本語の仕上げ（新記事のたびに）**
+- 下書きができたら、本文（`context=edit` の raw）を `$W/wp_auto/generated/draft_<ID>.html` に保存し、`python3 $W/wp_auto/scripts/style_check.py <そのファイル>` を通す。
+- FAIL があれば、`$W/wp_auto/style/ichigyo_日本語ルール.md` の2〜3章で**段落の文だけ**を言い直して、REST で下書きを更新する（ブロックの印 `<!-- wp:… -->`・画像・表・囲み・見出しの数は変えない。文の意味と事実を変えない）。もう一度チェック。**最大2周**。
+- 最後に 3-2 の AI臭さチェック表と 3-3 の100点表で自己採点し、`generated/score_<ID>.md` に書く。届かなくても下書きのまま、届かなかった点を報告に1行。
+- `claude_search_result` が0か、ここでも確かめる。
+
 - 試し運転（`--dry-run`、7〜15分。終わるまで待ってから返事）→ テスト記事を1本 **下書き**。お客さんへ：「試しの記事を1本、下書きに入れました。ブログの管理画面の『投稿』→『下書き』で見られます。良ければ、ご自身で『公開』を押してください」
 `DONE 8` → push。
 
@@ -146,7 +162,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 
 **9-1. 作る**
 - 「新記事（9-0 の回数・朝6時台）」と「キーワード補充（日曜。新記事が毎日なら水曜と日曜）」、つながっていれば「リライト（9-0 の回数。新記事と違う曜日・時刻）」。**このセッションに向けて** `create_trigger` で作る。間は1時間以上、分は 00/30 を避ける。時刻はお客さんの国の朝。
-- 指示文の最初に「`SETUP_LINK.md` の0章とR章を読み、R章を実行してから。`$W/ichigyo/ichigyo_AI_SETUP.md` の15〜17章に従う。最後に R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）を必ず行う」。
+- 指示文の最初に「`SETUP_LINK.md` の0章とR章を読み、R章を実行してから。`$W/ichigyo/ichigyo_AI_SETUP.md` の15〜17章に従い、新記事は 8-3 の日本語の仕上げも通す。最後に R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）を必ず行う」。
 - 作ったら確かめる。ただし新記事は8章の試し記事で確かめ済みなので、新記事の予約は手動で動かさない（お客さんの下書きが1日に2本入らないように）。記録の取り出し（R章の5）と preflight だけ通ることを確かめる。キーワード補充の予約は1回だけ手動で動かしてよい。結果を `$W/ichigyo/STATE.md` に書いて push。
 - 鍵をあとで変えたら、6章の形のリンクで新しいセッションを開いてもらい、そこで定期実行を作り直す。
 `DONE 9` → push。
