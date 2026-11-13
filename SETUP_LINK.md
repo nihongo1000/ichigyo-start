@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-13 v7.3（この行が無い古いファイルは使わない）
+版: 2026-11-14 v7.4（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。このリポジトリ（公開）には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
@@ -145,7 +145,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 - 終わったら（作らなかったときも）`STATE.md` に `STYLE_DONE <日付>`。**`DONE 8` があるのに `STYLE_DONE` が無いブログ（前の版で設定したブログ）は、次の新記事の前にこの 8-2 を先にやる。**
 
 **8-3. 日本語の仕上げ（新記事のたびに）**
-- 下書きができたら、本文（`context=edit` の raw）を `$W/wp_auto/generated/draft_<ID>.html` に保存し、`python3 $W/wp_auto/scripts/style_check.py <そのファイル>` を通す。
+- 下書きができたら、本文（`context=edit` の raw）を `$W/wp_auto/generated/draft_<ID>.html` に保存し、まず `python3 $W/wp_auto/scripts/strip_evidence.py <そのファイル>` で参考リンクの囲みを消す（本体の設定を0にしても入るため。`REMOVED 1` 以上なら、ほかに直す所が無くても最後に REST で下書きを更新する）。そのあと `python3 $W/wp_auto/scripts/style_check.py <そのファイル>` を通す。
 - FAIL があれば、`$W/wp_auto/style/ichigyo_日本語ルール.md` の2〜3章で**段落の文だけ**を言い直して、REST で下書きを更新する（ブロックの印 `<!-- wp:… -->`・画像・表・囲み・見出しの数は変えない。文の意味と事実を変えない）。もう一度チェック。**最大2周**。
 - 最後に 3-2 の AI臭さチェック表と 3-3 の100点表で自己採点し、`generated/score_<ID>.md` に書く。届かなくても下書きのまま、届かなかった点を報告に1行。
 - `claude_search_result` が0か、ここでも確かめる。
