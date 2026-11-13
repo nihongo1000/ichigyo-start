@@ -38,11 +38,12 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
-cd "$(git rev-parse --show-toplevel)" && { git fetch -q origin main && git reset -q --hard origin/main && echo KIT_LATEST || echo KIT_NOT_UPDATED; }; R=$(pwd)
+# 0. 最新の手順書と部品を、画面のフォルダを変えずに /tmp/kit に取る（画面の枝は動かさない）
+cd "$(git rev-parse --show-toplevel)" && R=/tmp/kit && rm -rf $R && mkdir -p $R; ok=1; git fetch -q origin main || ok=0; for f in SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc; do [ $ok = 1 ] && { git show "origin/main:$f" > "$R/$f" || ok=0; }; done; if [ $ok = 1 ]; then echo KIT_LATEST; else cp SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc $R/; echo KIT_NOT_UPDATED; fi
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
 # 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ichigyo_set.enc -out /tmp/set/set.zip -pass env:ICHIGYO_PASS 2>/dev/null
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in $R/ichigyo_set.enc -out /tmp/set/set.zip -pass env:ICHIGYO_PASS 2>/dev/null
 python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/set')" /tmp/set/set.zip && echo SET_OK
 S=/tmp/set/ichigyo_SET_v5
 # 2. 作業フォルダ（キットの初期状態）
@@ -61,7 +62,8 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 # 6. このブログ用の本体の設定（話し方など）をかぶせる
 [ -d $W/tools/ichigyo ] && cp -r $W/tools/ichigyo/. /home/user/ichigyo/tool/ && echo OVERLAY_OK
 ```
-- 1行目で `KIT_LATEST` が出なければ、もう一度だけ試し、だめなら古い手順のまま進めて報告に1行（画面は作業用の枝で始まるので、ただの git pull では最新にならない）。**このリポジトリには書き込まない（push しない・枝を作って送らない）。**
+- 0 で `KIT_LATEST` が出たら、**以後の手順は `/tmp/kit/SETUP_LINK.md`（最新）で読む**（画面のフォルダの SETUP_LINK.md は古いことがある）。出なければ、もう一度だけ試し、だめなら古い手順のまま進めて報告に1行。
+- **画面のフォルダ（このリポジトリ）では git の操作をしない**（pull・reset・commit・push・枝づくりをしない）。動かすと『送っていない変更がある』という確認がお客さんの画面に毎回出るため。もしその確認が出たら、`git reset -q --hard @{u} 2>/dev/null` で画面の枝を元に戻すだけにして、お客さんには何も書かない。
 - 以後 `ichigyo_AI_SETUP.md` の `KIT` は `$W/wp_auto`、`<リポジトリ>` は `$W`、ichigyo 本体は `/home/user/ichigyo/tool`（15-4 の tar の行は不要。`pip install -r requirements.txt` からでよい）。
 - 15-4 の `image_config.json` など S9 で決めた本体の設定は `$W/tools/ichigyo/` に置き（記録に入る）、毎回 `/home/user/ichigyo/tool` にかぶせる。
 - 終わりは必ず：`cd $W && git add -A && git commit -qm "<何をしたか>"` → `python3 -I "$R/ichigyo_state.py" push $W`（`STATE_SAVED` が出なければ失敗として報告）。
@@ -165,7 +167,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
   2. ラッコが無い、または候補が0件なら、公開から90日以上たった記事のうち、更新が古い順に1本。
   3. 下書き・非公開・固定ページ・`skip_urls.txt` の記事は選ばない。
   - 中身は 15-3 のとおり（足りない見出しの追記・古い情報の更新）。**承認期間（15-0）のあいだは反映せず、案と差分だけを報告**し、お客さんが「反映して」と送ったら直す。
-  - サーチコンソールは上級者向けの後付け。お客さんから言われたときだけ案内し、こちらからはすすめない。お客さんが「サーチコンソールもつなぎたい」と送ったら、このリポジトリの `SETUP_SC.md` のとおりに進める。
+  - サーチコンソールは上級者向けの後付け。お客さんから言われたときだけ案内し、こちらからはすすめない。お客さんが「サーチコンソールもつなぎたい」と送ったら、`/tmp/kit/SETUP_SC.md`（R章の0で取った最新）のとおりに進める。
 
 **9-1. 作る**
 - 「新記事（9-0 の回数・朝6時台）」と「キーワード補充（日曜。新記事が毎日なら水曜と日曜）」、つながっていれば「リライト（9-0 の回数。新記事と違う曜日・時刻）」。**このセッションに向けて** `create_trigger` で作る。間は1時間以上、分は 00/30 を避ける。時刻はお客さんの国の朝。
