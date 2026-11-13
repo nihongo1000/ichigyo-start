@@ -34,7 +34,8 @@ python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/se
 ## 2. お客さんの預け場所を作る（お客さんはボタン1つ）
 Claude は GitHub に新しい置き場所を作れない（作る道具は使えない）。だから、作成画面を開くリンクを渡して、お客さんに緑のボタンを1回押してもらう。**3章の質問と同じ1通にまとめる**（往復を増やさない）：
 「1. このリンクを押してください → https://github.com/new?name=ichigyo-auto&visibility=private
-2. 『Private』が選ばれているのを見て、いちばん下の緑の『Create repository』を押してください（『already exists』と赤く出たら、名前の欄を ichigyo-auto2 に変えてから押す）」
+2. 『Private』が選ばれているのを見て、いちばん下の緑の『Create repository』を押してください（名前の下に『already exists』と赤く出たら、もう作ってあるという意味です。その画面は閉じて、そのまま次へ進んでください）」
+- 置き場所がもう有って中身も入っている（前に途中までセットアップした等）場合は、中の `ichigyo/STATE.md` を読んで、DONE になっている所から続ける。中身が ichigyo と関係ない物なら上書きせず、お客さんに名前を ichigyo-auto2 にして作り直してもらう。
 1. 「できた」が来たら `add_repo`（access は push）で付ける。付けられない・押し込めない（権限が無い）と言われたら、お客さんへ1通：「1. このリンクを押してください → https://github.com/settings/installations　2. 『Claude』の行の『Configure』を押す　3. 『Repository access』で『All repositories』を選ぶ（または『Select repositories』で ichigyo-auto を足す）　4. 緑の『Save』を押す（途中で GitHub の本人確認が出たら、メールに届いた数字を入れる）。押したら『できた』と送ってください」
 2. もう一度 `add_repo` して clone する。
 3. 部品を置く（`SETUP_CLOUD.md` v4 の1章と同じ形）：
