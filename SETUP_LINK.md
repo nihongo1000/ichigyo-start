@@ -33,7 +33,7 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
-cd "$(git rev-parse --show-toplevel)" && git pull -q 2>/dev/null; R=$(pwd)
+cd "$(git rev-parse --show-toplevel)" && { git fetch -q origin main && git reset -q --hard origin/main && echo KIT_LATEST || echo KIT_NOT_UPDATED; }; R=$(pwd)
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
 # 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
@@ -56,6 +56,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 # 6. このブログ用の本体の設定（話し方など）をかぶせる
 [ -d $W/tools/ichigyo ] && cp -r $W/tools/ichigyo/. /home/user/ichigyo/tool/ && echo OVERLAY_OK
 ```
+- 1行目で `KIT_LATEST` が出なければ、もう一度だけ試し、だめなら古い手順のまま進めて報告に1行（画面は作業用の枝で始まるので、ただの git pull では最新にならない）。**このリポジトリには書き込まない（push しない・枝を作って送らない）。**
 - 以後 `ichigyo_AI_SETUP.md` の `KIT` は `$W/wp_auto`、`<リポジトリ>` は `$W`、ichigyo 本体は `/home/user/ichigyo/tool`（15-4 の tar の行は不要。`pip install -r requirements.txt` からでよい）。
 - 15-4 の `image_config.json` など S9 で決めた本体の設定は `$W/tools/ichigyo/` に置き（記録に入る）、毎回 `/home/user/ichigyo/tool` にかぶせる。
 - 終わりは必ず：`cd $W && git add -A && git commit -qm "<何をしたか>"` → `python3 -I "$R/ichigyo_state.py" push $W`（`STATE_SAVED` が出なければ失敗として報告）。
