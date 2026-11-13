@@ -35,7 +35,7 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 cd "$(git rev-parse --show-toplevel)" && git pull -q 2>/dev/null; R=$(pwd)
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
-# 1. 合言葉：2回目からは環境の ICHIGYO_PASS。初回だけ export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
+# 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ichigyo_set.enc -out /tmp/set/set.zip -pass env:ICHIGYO_PASS 2>/dev/null
 python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/set')" /tmp/set/set.zip && echo SET_OK
 S=/tmp/set/ichigyo_SET_v5
@@ -73,8 +73,9 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前は「ichigyo 〈ドメイン〉」（例：ichigyo example.com。`https://`・`www.`・最後の / は付けない。ブログが複数になっても見分けられるように。同じ名前が使われていれば、そのブログの続きなので6章のリンクから再開する）。以下この名前を〈環境の名前〉と書く、scope personal、`switch_session` は none。
    - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`、`suggestqueries.google.com`（ichigyo 本体がキーワードの候補を見るため）
-   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。表示しない）、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
+   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。お客さん自身の開始リンクにすでに入っている文字なので、許可の枠に出ても問題ない。チャットの文には書かない）、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
+- 5章の文に、ICHIGYO_PASS を打ち込ませる手順を足さない（打ちまちがいで7章が止まるため）。万一この枠で入れられなかったときは、6章の続きのリンクの文の最後に `合言葉: 〈合言葉〉` を付け、7章で `update_environment` で入れる。
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
 
