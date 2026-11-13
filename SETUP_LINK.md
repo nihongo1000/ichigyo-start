@@ -71,7 +71,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 ## 4. 通信の設定を作る（お客さんは許可のボタンだけ）
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前「ichigyo 自動運用」（使われていれば「ichigyo 自動運用2」）、scope personal、`switch_session` は none。
-   - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`
+   - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`、`suggestqueries.google.com`（ichigyo 本体がキーワードの候補を見るため）
    - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。表示しない）、`ICHIGYO_ANSWERS`、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
