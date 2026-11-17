@@ -1,12 +1,12 @@
 # ichigyo はてなブログ版：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-18 hatena v1.0（この行が無い古いファイルは使わない）
+版: 2026-11-18 hatena v1.0.1（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_HATENA_PASS` に入っている）。このリポジトリ（公開）の `hatena/` には、この指示書・鍵のかかった部品 `hatena_set.enc`・記録の道具 `hatena_state.py` だけがある。
 お客さんのパソコンは使わない。お客さんにファイルを扱わせない。**お客さん用の GitHub の置き場所は作らない（頼まない）。** 記録はお客さんのはてなブログの **下書き1本** にしまう（`hatena_state.py`）。
 リポジトリの最上位にある `SETUP_LINK.md` などは WordPress 版のもの。**はてなブログ版では読まない・使わない。**
-（テスト中だけ）画面のフォルダに `hatena/` が無いときは、環境の設定の `ICHIGYO_KIT_REF` を使い、`git fetch -q origin "$ICHIGYO_KIT_REF" && git show FETCH_HEAD:hatena/SETUP_HATENA.md` でこの指示書を読む。6章の続きのリンクと9章の定期実行の指示文にも、同じ読み方を1文で足す。
+（テスト中だけ）画面のフォルダに `hatena/` が無いときは、環境の設定の `ICHIGYO_KIT_REF` を使う。**環境に無いときは、最初の文の `ICHIGYO_KIT_REF=〈枝の名前〉`（無ければ最初の文に書かれた枝の名前）を使い、以後このセッションのコマンドでは毎回 `export ICHIGYO_KIT_REF=〈枝の名前〉` を先に付ける**（R章の0がこの値で枝を読むため。付け忘れると main を読み、`hatena/` が無くて止まる）。この指示書は `git fetch -q origin "$ICHIGYO_KIT_REF" && git show FETCH_HEAD:hatena/SETUP_HATENA.md` で読む。4章の環境の設定には `ICHIGYO_KIT_REF` も入れ、6章の続きのリンクと9章の定期実行の指示文にも、同じ読み方を1文で足す。
 
 ## 0. いちばん大事な決まり（どの手順より優先）
 - **このセッションでは、最初から最後まで日本語だけを使う。** お客さんへの返事・作業中のひとりごと・途中経過・定期実行の報告のどれも、英語にしない（英語が1文でも出たら、次の文から日本語に戻す）。
@@ -74,7 +74,7 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前は「ichigyo はてな 〈ドメイン〉」（例：ichigyo はてな example.hatenablog.com。同じ名前が使われていれば、そのブログの続きなので6章のリンクから再開する）。以下この名前を〈環境の名前〉と書く、scope personal、`switch_session` は none。
    - 通信先：`blog.hatena.ne.jp`、`f.hatena.ne.jp`、ブログのドメイン、`api.meta.ai`、`suggestqueries.google.com`
-   - 設定：`HATENA_ID`、`HATENA_BLOG_ID`、`ICHIGYO_HATENA_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。チャットの文には書かない）、`HATENA_API_KEY`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、HATENA_API_KEY= と打ってから」を足す
+   - 設定：`HATENA_ID`、`HATENA_BLOG_ID`、`ICHIGYO_HATENA_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。チャットの文には書かない）、`HATENA_API_KEY`（空）、`MUSE_API_KEY`（空）、（テスト中だけ）`ICHIGYO_KIT_REF`（最初の文または環境の値）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、HATENA_API_KEY= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
