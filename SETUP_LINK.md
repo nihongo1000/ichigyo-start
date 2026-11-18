@@ -1,16 +1,17 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-14 v7.4（この行が無い古いファイルは使わない）
+版: 2026-11-18 v7.5（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
-最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。このリポジトリ（公開）には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
+最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
+**このリポジトリが画面につながっていないことがある**（リンクの指定が効かず、お客さんの別のリポジトリだけがつながっている、など）。そのときもお客さんに何も聞かず、R章の0が公開リポジトリから直接取るので、そのまま進める。お客さんの別のリポジトリ（ichigyo-start 以外）は、読まない・変えない・使わない。
 お客さんのパソコンは使わない。お客さんにファイルを扱わせない。**お客さん用の GitHub の置き場所は作らない（頼まない）。** 記録はお客さんの WordPress の非公開ページ1枚にしまう（`ichigyo_state.py`）。
 
 ## 0. いちばん大事な決まり（どの手順より優先）
 - **このセッションでは、最初から最後まで日本語だけを使う。** お客さんへの返事・作業中のひとりごと・途中経過・定期実行の報告のどれも、英語にしない（英語が1文でも出たら、次の文から日本語に戻す）。
 - **重い作業は下請け（サブエージェント）に出す（使用量を減らすため。R章より先に読む）。** 担当の画面は、記事を書くたびに会話が長くなる。長い会話は、道具を1回使うたびに全部を読み直すので、1本あたりの使用量がどんどん増える（実測：担当の画面で「今すぐ1本」を1回頼んだだけで、読み直しが合わせて約1,500万トークンになった）。そこで次の作業は、Agent ツール（subagent_type は general-purpose、model は指定しない）に任せる。
   - 任せる作業：8章の 8-2（話し方づくり）から試し記事と 8-3 まで／10-1 の「今すぐ1本」／定期実行の新記事・リライト案・キーワード補充と報告
-  - 渡す文：「【下請け】`<このリポジトリの場所>/SETUP_LINK.md` の0章とR章を読み、R章を実行してから、〈やること。定期実行ならその指示文をそのまま〉。新記事は 8-3 も通す。終わりは R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）まで必ず行う。最後に、下書きの ID・タイトル・プレビューの URL・Muse の枚数と今月の画像代・`STATE_SAVED` が出たか・お客さんに伝えることを、日本語10行以内で返す」
+  - 渡す文：「【下請け】`/tmp/kit/SETUP_LINK.md`（無ければ `/home/user/ichigyo-start/SETUP_LINK.md`）の0章とR章を読み、R章を実行してから、〈やること。定期実行ならその指示文をそのまま〉。新記事は 8-3 も通す。終わりは R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）まで必ず行う。最後に、下書きの ID・タイトル・プレビューの URL・Muse の枚数と今月の画像代・`STATE_SAVED` が出たか・お客さんに伝えることを、日本語10行以内で返す」
   - この画面では、返ってきた内容から、お客さんへの文（日本語・短く）だけを書く。`STATE_SAVED` が無いときや失敗したときは、そのことも1行で書く。
   - **渡された文が【下請け】で始まるとき（あなたが下請けのとき）は、この項目を飛ばして、自分で最後までやる**（さらに下請けに出さない）。Agent ツールが無いときも、この画面で直接やる。
 - お客さんはパソコン初心者。**専門用語が1つでも出ると、そこで混乱して止まる。** 次の言葉はお客さんへの文に出さない：コマンド、リポジトリ、ブランチ、main、git、push、コミット、フック、環境変数（画面の名前として『環境変数』を押してもらうときだけ可）、API、Python、セッション、プロパティ、sc-domain、ファイル名（SETUP_LINK.md・SETUP_SC.md など）、章の名前（R章・6章など）、手順書。画面に出る言葉は「画面の『〇〇』」とそのまま書く。
@@ -26,7 +27,7 @@
 - **鍵をコピーしてから貼るまでの間は、ほかの文をコピーさせない**（クリップボードの鍵が消える）。
 - 新記事は必ず下書き。公開はお客さん。リライトは案だけ。お客さんが「反映して」と言うまで直さない。
 - ichigyo 本体（`gemini_wordpress_unified.py`）は読まない（grep・head も含めて開かない）・書きかえない・まねしない。設定の名前は `config_ANIME.json` と `README.txt` だけで調べる。動かすのは `wp_auto/scripts/ichigyo_cloud_run.py` だけ（`ichigyo_AI_SETUP.md` 1-1c）。
-- 作業フォルダは `W=/home/user/ichigyo-work`（毎回 R章で作り直す）。進み具合は `$W/ichigyo/STATE.md` に `DONE <章>` で足し、区切りごとに `python3 -I ichigyo_state.py push $W` で WordPress にしまう（`STATE_SAVED` が出ること）。始めるときは必ず R章で取り出して読み、終わっていない章から進める。
+- 作業フォルダは `W=/home/user/ichigyo-work`（毎回 R章で作り直す）。進み具合は `$W/ichigyo/STATE.md` に `DONE <章>` で足し、区切りごとに `python3 -I /tmp/kit/ichigyo_state.py push $W` で WordPress にしまう（`STATE_SAVED` が出ること）。始めるときは必ず R章で取り出して読み、終わっていない章から進める。
 - `ichigyo_AI_SETUP.md` の git・`claude/state`・push・リポジトリの話は、この指示書では「`$W`（手元だけの git、ブランチ claude/state）に commit → `ichigyo_state.py push`」に読みかえる。`not_pushed` の判定は `STATE_SAVED` が出たかで決める。
 
 - **ラッコが無い人でも止めない。** ラッコのコネクタがつながっていないときは：
@@ -40,8 +41,8 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
-# 0. 最新の手順書と部品を、画面のフォルダを変えずに /tmp/kit に取る（画面の枝は動かさない）
-cd "$(git rev-parse --show-toplevel)" && R=/tmp/kit && rm -rf $R && mkdir -p $R; ok=1; git fetch -q origin main || ok=0; for f in SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc; do [ $ok = 1 ] && { git show "origin/main:$f" > "$R/$f" || ok=0; }; done; if [ $ok = 1 ]; then echo KIT_LATEST; else cp SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc $R/; echo KIT_NOT_UPDATED; fi
+# 0. 最新の手順書と部品を、公開リポジトリから直接 /tmp/kit に取る（画面につながっているリポジトリは使わない・動かさない）
+R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
 # 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
@@ -64,8 +65,8 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 # 6. このブログ用の本体の設定（話し方など）をかぶせる
 [ -d $W/tools/ichigyo ] && cp -r $W/tools/ichigyo/. /home/user/ichigyo/tool/ && echo OVERLAY_OK
 ```
-- 0 で `KIT_LATEST` が出たら、**以後の手順は `/tmp/kit/SETUP_LINK.md`（最新）で読む**（画面のフォルダの SETUP_LINK.md は古いことがある）。出なければ、もう一度だけ試し、だめなら古い手順のまま進めて報告に1行。
-- **画面のフォルダ（このリポジトリ）では git の操作をしない**（pull・reset・commit・push・枝づくりをしない）。動かすと『送っていない変更がある』という確認がお客さんの画面に毎回出るため。もしその確認が出たら、`git reset -q --hard @{u} 2>/dev/null` で画面の枝を元に戻すだけにして、お客さんには何も書かない。
+- 0 で `KIT_LATEST` が出たら、**以後の手順は `/tmp/kit/SETUP_LINK.md`（最新）で読む**（画面のフォルダの SETUP_LINK.md は古いことがある）。出なければ、もう一度だけ試す。それでもだめで `KIT_NOT_UPDATED` なら、手元の写しのまま進めて報告に1行。どちらも出ない（部品がどこにも無い）ときは、`add_repo`（owner `nihongo1000`、repo `ichigyo-start`）でこの画面に足してから 0 をやり直す。お客さんには何も聞かない。
+- **画面につながっているリポジトリ（ichigyo-start でも、お客さんの別のリポジトリでも）では git の操作をしない**（pull・reset・commit・push・枝づくりをしない）。動かすと『送っていない変更がある』という確認がお客さんの画面に毎回出るため。もしその確認が出たら、ichigyo-start の画面の枝だけ `git reset -q --hard @{u} 2>/dev/null` で元に戻し（お客さんの別のリポジトリは触らない）、お客さんには何も書かない。
 - 以後 `ichigyo_AI_SETUP.md` の `KIT` は `$W/wp_auto`、`<リポジトリ>` は `$W`、ichigyo 本体は `/home/user/ichigyo/tool`（15-4 の tar の行は不要。`pip install -r requirements.txt` からでよい）。
 - 15-4 の `image_config.json` など S9 で決めた本体の設定は `$W/tools/ichigyo/` に置き（記録に入る）、毎回 `/home/user/ichigyo/tool` にかぶせる。
 - 終わりは必ず：`cd $W && git add -A && git commit -qm "<何をしたか>"` → `python3 -I "$R/ichigyo_state.py" push $W`（`STATE_SAVED` が出なければ失敗として報告）。
@@ -115,13 +116,13 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 `DONE 5`。
 
 ## 6. 続きのリンクを渡す（鍵は、あとから始めたセッションにしか入らないため）
-次の形でリンクを作り（値はURL用に変換する）、お客さんへ1通：
-`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=SETUP_LINK.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉`
+次の形でリンクを作り（値はURL用に変換する。`repositories=` が効かない画面もあるので、prompt の最初の文は必ず残す）、お客さんへ1通：
+`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。その中の SETUP_LINK.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉`
 「最後に、このリンクを押して、出てきた画面で Enter を押してください。新しいタブで開きます。そこから先は、その画面の私が仕上げます。この画面は閉じても残しても大丈夫です（もう使いません）→ 〈リンク〉」
 - このセッションの仕事はここまで（まだ WordPress の鍵が無いので記録はしまわない。答えはリンクの文に入っている）。
 
 ## 7. 接続の確認（新しいセッション。`ichigyo_AI_SETUP.md` 12章 S8 のゲート）
-- まず R章（全部）。`STATE_OK` が出るか `python3 -I ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
+- まず R章（全部）。`STATE_OK` が出るか `python3 -I /tmp/kit/ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - **ブログのサーバーが海外からのつながりを止めている**（WordPress の確認で 403、または『国外IP』『アクセス制限』の画面が返る）ときは、サーバーの種類を調べて（ネームサーバー・管理画面の作り）、1通で案内する。図解のページができたら、その URL を付ける。
   - エックスサーバー／シンレンタルサーバー：「1. https://secure.xserver.ne.jp/xapanel/login/xserver/ でログイン → 2.『サーバー管理』→『WordPress』の欄の『WordPressセキュリティ設定』→ 3. 〈ドメイン〉の『選択する』→ 4. 上のタブの『国外アクセス制限』→『REST API アクセス制限』の行だけ『OFFにする』を選ぶ（ほかはそのまま）→ 5. 右下の『設定する』（確認の画面が出たら『変更する』）」
@@ -173,7 +174,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 
 **9-1. 作る**
 - 「新記事（9-0 の回数・朝6時台）」と「キーワード補充（日曜。新記事が毎日なら水曜と日曜）」、つながっていれば「リライト（9-0 の回数。新記事と違う曜日・時刻）」。**このセッションに向けて** `create_trigger` で作る。間は1時間以上、分は 00/30 を避ける。時刻はお客さんの国の朝。
-- 指示文の最初に「`SETUP_LINK.md` の0章とR章を読み、R章を実行してから。`$W/ichigyo/ichigyo_AI_SETUP.md` の15〜17章に従い、新記事は 8-3 の日本語の仕上げも通す。最後に R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）を必ず行う」。
+- 指示文の最初に「GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。`/home/user/ichigyo-start/SETUP_LINK.md` の0章とR章を読み、R章を実行してから。`$W/ichigyo/ichigyo_AI_SETUP.md` の15〜17章に従い、新記事は 8-3 の日本語の仕上げも通す。最後に R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）を必ず行う」。
 - 作ったら確かめる。ただし新記事は8章の試し記事で確かめ済みなので、新記事の予約は手動で動かさない（お客さんの下書きが1日に2本入らないように）。記録の取り出し（R章の5）と preflight だけ通ることを確かめる。キーワード補充の予約は1回だけ手動で動かしてよい。結果を `$W/ichigyo/STATE.md` に書いて push。
 - 鍵をあとで変えたら、6章の形のリンクで新しいセッションを開いてもらい、そこで定期実行を作り直す。
 `DONE 9` → push。
