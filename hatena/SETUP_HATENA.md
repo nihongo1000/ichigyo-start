@@ -1,6 +1,6 @@
 # ichigyo はてなブログ版：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-18 hatena v1.0.1（この行が無い古いファイルは使わない）
+版: 2026-11-18 hatena v1.1（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_HATENA_PASS` に入っている）。このリポジトリ（公開）の `hatena/` には、この指示書・鍵のかかった部品 `hatena_set.enc`・記録の道具 `hatena_state.py` だけがある。
@@ -11,7 +11,7 @@
 ## 0. いちばん大事な決まり（どの手順より優先）
 - **このセッションでは、最初から最後まで日本語だけを使う。** お客さんへの返事・作業中のひとりごと・途中経過・定期実行の報告のどれも、英語にしない（英語が1文でも出たら、次の文から日本語に戻す）。
 - **重い作業は下請け（サブエージェント）に出す（使用量を減らすため。R章より先に読む）。** 担当の画面は、記事を書くたびに会話が長くなり、道具を1回使うたびに全部を読み直すので、1本あたりの使用量がどんどん増える。そこで次の作業は、Agent ツール（subagent_type は general-purpose、model は指定しない）に任せる。
-  - 任せる作業：8章の 8-2（話し方づくり）から試し記事と 8-3 まで／10-1 の「今すぐ1本」／定期実行の新記事・リライト案・キーワード補充と報告
+  - 任せる作業：8章の 8-2（話し方づくり）から試し記事と 8-3 まで／10-1 の「今すぐ1本」／定期実行の新記事・リライト案（サーチコンソール版の自動リライトも）・キーワード補充と報告
   - 渡す文：「【下請け】`<このリポジトリの場所>/hatena/SETUP_HATENA.md` の0章とR章を読み、R章を実行してから、〈やること。定期実行ならその指示文をそのまま〉。新記事は 8-3 も通す。終わりは R章の『終わり』（commit → `hatena_state.py push`、`STATE_SAVED`）まで必ず行う。最後に、下書きの ID・タイトル・画像の枚数と今月の画像代・`STATE_SAVED` が出たか・お客さんに伝えることを、日本語10行以内で返す」
   - この画面では、返ってきた内容から、お客さんへの文（日本語・短く）だけを書く。`STATE_SAVED` が無いときや失敗したときは、そのことも1行で書く。
   - **渡された文が【下請け】で始まるとき（あなたが下請けのとき）は、この項目を飛ばして、自分で最後までやる**（さらに下請けに出さない）。Agent ツールが無いときも、この画面で直接やる。
@@ -23,9 +23,9 @@
 - 1通に、続けてできる操作を番号つきでまとめる。押したら「できた」と送ってもらう。返事を待つ文はいちばん最後に置く。
 - **新記事は毎回、道具で作ったあとに 8-3 の『日本語の仕上げ』を通す**（試し記事・定期実行・10-1 のどれも）。
 - 作業の中身（ファイル名、件数、手順番号、PASS/FAIL）は書かない。見せるのは「次に押すもの」と「あと何をすれば終わるか」だけ。
-- **合言葉・鍵（はてなの APIキー・Muse のキー）は表示しない・ファイルに書かない・チャットに貼らせない。** 鍵はクラウド環境の設定にだけ置く（お客さんが自分で貼る）。
+- **合言葉・鍵（はてなの APIキー・Muse のキー・サーチコンソールの鍵のファイル）は表示しない・ファイルに書かない・チャットに貼らせない。** 鍵はクラウド環境の設定にだけ置く（お客さんが自分で貼る）。
 - **鍵をコピーしてから貼るまでの間は、ほかの文をコピーさせない**（クリップボードの鍵が消える）。
-- **新記事は必ず下書き。** 公開はお客さん。リライトは案だけ。お客さんが「反映して」と言うまで直さない。
+- **新記事は必ず下書き。** 公開はお客さん。リライトは案だけ。お客さんが「反映して」と言うまで直さない（サーチコンソールをつないで、お客さんが『自動でOK』と送ったあとだけ、`SETUP_SC_HATENA.md` 7-5 のとおり自動で直す）。
 - **記録の下書き**（タイトル『ichigyo の記録（公開しないでください・消さないでください）』）は、記事の一覧に数えない・選ばない・直さない。
 - 本文に **出典のURL・参考リンクを入れない**（クラウドの検索では本物の URL を確かめられないため）。
 
@@ -35,8 +35,8 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
 # 0. 最新の手順書と部品を、画面のフォルダを変えずに /tmp/hkit に取る（画面の枝は動かさない）
-cd "$(git rev-parse --show-toplevel)" && R=/tmp/hkit && rm -rf $R && mkdir -p $R; REF=${ICHIGYO_KIT_REF:-main}; ok=1; git fetch -q origin "$REF" || ok=0; for f in SETUP_HATENA.md hatena_state.py hatena_set.enc; do [ $ok = 1 ] && { git show "FETCH_HEAD:hatena/$f" > "$R/$f" || ok=0; }; done; if [ $ok = 1 ]; then echo KIT_LATEST; else cp hatena/SETUP_HATENA.md hatena/hatena_state.py hatena/hatena_set.enc $R/; echo KIT_NOT_UPDATED; fi
-PY=$(command -v python3.13 || command -v python3); $PY -m pip install -q requests pillow
+cd "$(git rev-parse --show-toplevel)" && R=/tmp/hkit && rm -rf $R && mkdir -p $R; REF=${ICHIGYO_KIT_REF:-main}; ok=1; git fetch -q origin "$REF" || ok=0; for f in SETUP_HATENA.md SETUP_SC_HATENA.md hatena_state.py hatena_set.enc; do [ $ok = 1 ] && { git show "FETCH_HEAD:hatena/$f" > "$R/$f" || ok=0; }; done; if [ $ok = 1 ]; then echo KIT_LATEST; else cp hatena/SETUP_HATENA.md hatena/SETUP_SC_HATENA.md hatena/hatena_state.py hatena/hatena_set.enc $R/; echo KIT_NOT_UPDATED; fi
+PY=$(command -v python3.13 || command -v python3); $PY -m pip install -q requests pillow google-auth
 rm -rf /tmp/hset && mkdir -p /tmp/hset
 # 1. 合言葉：2回目からは環境の ICHIGYO_HATENA_PASS。環境に無いとき（初回）は export ICHIGYO_HATENA_PASS='<最初の文の合言葉>'（表示しない）
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in $R/hatena_set.enc -out /tmp/hset/set.zip -pass env:ICHIGYO_HATENA_PASS 2>/dev/null
@@ -51,10 +51,10 @@ python3 -I "$R/hatena_state.py" pull $W && git add -A && { git commit -qm restor
 # 5. このブログ用のもの（設定・話し方・在庫）を道具にかぶせる
 cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 ```
-- 0 で `KIT_LATEST` が出たら、**以後の手順は `/tmp/hkit/SETUP_HATENA.md`（最新）で読む**。出なければ、もう一度だけ試し、だめなら古い手順のまま進めて報告に1行。
+- 0 で `KIT_LATEST` が出たら、**以後の手順は `/tmp/hkit/SETUP_HATENA.md`（最新）で読む**（サーチコンソールの手順は `/tmp/hkit/SETUP_SC_HATENA.md`）。出なければ、もう一度だけ試し、だめなら古い手順のまま進めて報告に1行。
 - **画面のフォルダ（このリポジトリ）では git の操作をしない**（pull・reset・commit・push・枝づくりをしない）。もし『送っていない変更がある』という確認が出たら、`git reset -q --hard @{u} 2>/dev/null` で戻すだけにして、お客さんには何も書かない。
 - 以後 `H=$W/hatena_auto`（道具）、`A="python3 $H/scripts/hatena_api.py"`（はてなとのやりとり）。
-- **お客さんごとのものは必ず `$W/site/` に書く**（`config.json`・`prompts/system_persona.txt`・`prompts/style_site.txt`・`my_style/speech_custom.txt`・`my_style/settings.json`・`keywords_queue.csv`・`post_log.csv`・`skip_urls.txt`）。書いたら毎回 `cp -r $W/site/. $H/` でかぶせる。`$H` の中に直接書いたものは記録に残らない。
+- **お客さんごとのものは必ず `$W/site/` に書く**（`config.json`・`prompts/system_persona.txt`・`prompts/style_site.txt`・`my_style/speech_custom.txt`・`my_style/settings.json`・`keywords_queue.csv`・`post_log.csv`・`skip_urls.txt`・`rewrite_log.csv`・`rewrite/`・`backup/`）。書いたら毎回 `cp -r $W/site/. $H/` でかぶせる。`$H` の中に直接書いたものは記録に残らない。
 - 終わりは必ず：`cd $W && git add -A && git commit -qm "<何をしたか>"` → `python3 -I "$R/hatena_state.py" push $W`（`STATE_SAVED` が出なければ失敗として報告）。
 
 ## 3. 最初の1通（1章が終わったらすぐ）
@@ -163,12 +163,16 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 
 ## 10. 最後のあいさつ
 - 先に `set_session_title` でこの画面の名前を「〈環境の名前〉 担当（消さないでください）」にする。
-「設定が終わりました。〈曜日〉の朝に、記事が1本ずつ下書きに入ります（回数を変えたいときは、いつでもこの画面で『回数を変えて』と送ってください）（パソコンは消えていても大丈夫です）。これからは、claude.ai/code の左の一覧にある『〈環境の名前〉 担当（消さないでください）』がこのブログの担当の画面です。報告もここに届き、相談もここでできます。もしこの画面が止まったり重くなったりしたら、最初の開始リンクをもう一度押してください。設定はブログ側に残っているので、新しい担当の画面にそのまま引き継ぎます。下書きははてなブログの『記事の管理』→『下書き』で確認して、良ければ『公開する』を押してください。画像の費用は1本あたり約〇円です。下書きにある『ichigyo の記録（公開しないでください・消さないでください）』は、設定と記録の保管用なので、公開も削除もしないでください」
+「設定が終わりました。〈曜日〉の朝に、記事が1本ずつ下書きに入ります（回数を変えたいときは、いつでもこの画面で『回数を変えて』と送ってください）（パソコンは消えていても大丈夫です）。これからは、claude.ai/code の左の一覧にある『〈環境の名前〉 担当（消さないでください）』がこのブログの担当の画面です。報告もここに届き、相談もここでできます。もしこの画面が止まったり重くなったりしたら、最初の開始リンクをもう一度押してください。設定はブログ側に残っているので、新しい担当の画面にそのまま引き継ぎます。下書きははてなブログの『記事の管理』→『下書き』で確認して、良ければ『公開する』を押してください。画像の費用は1本あたり約〇円です。Google での順位を見て古い記事を直すようにしたいときは、この画面で『サーチコンソールにつないで』と送ってください。下書きにある『ichigyo の記録（公開しないでください・消さないでください）』は、設定と記録の保管用なので、公開も削除もしないでください」
 - 3章の5があれば、その前に「〈ツール〉を止めてください（二重に投稿されるため）」。
 
 ## 10-1. お客さんが「今すぐ1本書いて」と送ったとき（担当の画面）
 - 「新しい記事を書いて」「今すぐ1本」などは、12章の新記事と同じ手順で1本だけ作る（R章から。下書き）。定期実行そのものは押して動かさない（1日に2本になるため）。
 - 「書き直して」「この記事を直して」は、直す案だけを送る。「反映して」と言われたら直す（12章のリライト案の最後）。
+
+## 10-2. お客さんが「サーチコンソールにつないで」と送ったとき（担当の画面）
+- 「サーチコンソール」「連携」「順位を見て直して」などは、`hatena/SETUP_SC_HATENA.md`（R章のあとは `/tmp/hkit/` の最新）を読み、その1章から行う。0章の決まりはそのまま。
+- 「〈記事〉を元に戻して」は `SETUP_SC_HATENA.md` 7-2 の戻し方。「自動でOK」「自動はやめて」は 7-5。
 
 ## 11. 作り直し（担当の画面が止まった・消えた・重くなったとき）
 - お客さんが開始リンクをもう一度押したとき、1章のあと、同じ名前の環境（〈環境の名前〉）がもうあれば、3章の質問はせずに6章の続きのリンクだけ渡す。
@@ -185,7 +189,7 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 **キーワード補充**（日曜など）
 - 在庫（status が空）が15個未満なら、8章と同じやり方で20個まで足す。公開記事・在庫・`skip_urls.txt` と同じ意味の語は足さない。報告は週に1回、2〜3行（今週入れた下書きの本数、在庫の数）。最初の1回だけ「ラッコをつなぐと、検索数を見てキーワードを選べます」と1行添える。
 
-**リライト案**
+**リライト案**（`STATE.md` に `SC_DONE` があるときは、これではなく `SETUP_SC_HATENA.md` 7章を行う）
 1. 記事を1本選ぶ：ラッコがつながっていれば `ranking-keywords`（このドメイン）で11〜30位の語と、その語で出ている自分の記事。無ければ `$A list /tmp/pub --n 100` の公開記事のうち、公開から90日以上たち、更新が古い順に1本。`skip_urls.txt`・記録の下書き・下書きは選ばない。
 2. `$A get <ID> /tmp/rw_<ID>.md` で本文を取り、足りない見出しの追記・古い情報の更新の案を、日本語ルール4章（筆者の声を消さない・構造を壊さない）で作る。直した全文を `$W/site/rewrite/<ID>.md` に置く（記録に入る）。
 3. **反映しない。** お客さんへ、直す所の要点（3〜5行）と「反映するときは、この画面で『反映して』と送ってください」を報告。

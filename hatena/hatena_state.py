@@ -22,7 +22,7 @@ SKIP_PATHS = {"ichigyo/SETUP_HATENA.md"}
 MAX_FILE = 300_000
 MAX_TOTAL = 1_500_000
 MAX_PAGES = 60
-SECRET_VARS = ("HATENA_API_KEY", "MUSE_API_KEY", "ICHIGYO_HATENA_PASS", "RAKKO_API_KEY")
+SECRET_VARS = ("HATENA_API_KEY", "MUSE_API_KEY", "ICHIGYO_HATENA_PASS", "RAKKO_API_KEY", "GSC_SA_JSON")
 NS = {"a": "http://www.w3.org/2005/Atom", "app": "http://www.w3.org/2007/app"}
 
 
@@ -115,6 +115,8 @@ def pack(work):
         val = os.environ.get(v, "").strip()
         if len(val) >= 8 and val.encode() in text:
             die(f"FAIL secret_in_state {v}")
+    if b"PRIVATE KEY-----" in text or b'"private_key"' in text:
+        die("FAIL secret_in_state GSC_SA_JSON")
     return blob
 
 
