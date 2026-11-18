@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-18 v7.7（この行が無い古いファイルは使わない）
+版: 2026-11-18 v7.8（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
@@ -43,7 +43,7 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
 # 0. 最新の手順書と部品を、公開リポジトリから直接 /tmp/kit に取る（画面につながっているリポジトリは使わない・動かさない）
-R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
+R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc sc_login.py sc_client.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
 # 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
@@ -60,6 +60,7 @@ rm -rf /tmp/ich /home/user/ichigyo/tool && python3 -c "import zipfile,sys; zipfi
 T=$(dirname "$(ls /tmp/ich/*/gemini_wordpress_unified.py)")
 mkdir -p /home/user/ichigyo && cp -r "$T" /home/user/ichigyo/tool && mkdir -p $W/wp_auto/fonts && cp "$T/fonts/NotoSansJP-Bold.ttf" $W/wp_auto/fonts/ 2>/dev/null
 # 4. 手元だけの git（17章のゲート用）
+python3 -I $R/sc_login.py patch $W 2>/dev/null  # サーチコンソールの『Google でログイン』型の鍵でも動くように
 cd $W && git init -q -b claude/state && printf '*.env\n*secret*\n' > .gitignore && git add -A && git commit -qm base
 # 5. 記録を取り出す（鍵が入ってから。NO_STATE はまだ何もしまっていないだけ）
 python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm restored -q 2>/dev/null || true; }; cat $W/ichigyo/STATE.md 2>/dev/null
