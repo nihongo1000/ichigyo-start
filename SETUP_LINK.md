@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-18 v7.5（この行が無い古いファイルは使わない）
+版: 2026-11-18 v7.6（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
@@ -23,6 +23,7 @@
 - 1通に、続けてできる操作を番号つきでまとめる。押したら「できた」と送ってもらう。返事を待つ文はいちばん最後に置く。
 - **新記事は毎回、ichigyo 本体で作ったあとに 8-3 の『日本語の仕上げ』を通す**（試し記事・定期実行・10-1 のどれも）。
 - 作業の中身（ファイル名、件数、手順番号、PASS/FAIL）は書かない。見せるのは「次に押すもの」と「あと何をすれば終わるか」だけ。
+- **合言葉は、お客さんに打ち込ませない・聞かない（どの章でも）。** 環境の `ICHIGYO_PASS` に無ければ、最初の文の `合言葉:` から取り、`update_environment`（許可の枠）で入れる。どちらにも無いときだけ「最初に届いた開始リンクを、もう一度押してください」と1行書く。
 - **合言葉・鍵（パスワード・APIキー）は表示しない・ファイルに書かない・チャットに貼らせない。** 鍵はクラウド環境の設定にだけ置く（お客さんが自分で貼る）。
 - **鍵をコピーしてから貼るまでの間は、ほかの文をコピーさせない**（クリップボードの鍵が消える）。
 - 新記事は必ず下書き。公開はお客さん。リライトは案だけ。お客さんが「反映して」と言うまで直さない。
@@ -89,7 +90,7 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
    - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`、`suggestqueries.google.com`（ichigyo 本体がキーワードの候補を見るため）
    - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。お客さん自身の開始リンクにすでに入っている文字なので、許可の枠に出ても問題ない。チャットの文には書かない）、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
-- 5章の文に、ICHIGYO_PASS を打ち込ませる手順を足さない（打ちまちがいで7章が止まるため）。万一この枠で入れられなかったときは、6章の続きのリンクの文の最後に `合言葉: 〈合言葉〉` を付け、7章で `update_environment` で入れる。
+- 5章の文に、ICHIGYO_PASS を打ち込ませる手順を足さない（打ちまちがいで7章が止まるため）。6章の続きのリンクの文の最後には、いつも `合言葉: 〈合言葉〉` を付ける（この枠で入らなかったときや、環境の設定が消えたときに、7章で `update_environment` で入れ直すため）。
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
 
@@ -117,12 +118,13 @@ python3 -I "$R/ichigyo_state.py" pull $W && git add -A && { git commit -qm resto
 
 ## 6. 続きのリンクを渡す（鍵は、あとから始めたセッションにしか入らないため）
 次の形でリンクを作り（値はURL用に変換する。`repositories=` が効かない画面もあるので、prompt の最初の文は必ず残す）、お客さんへ1通：
-`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。その中の SETUP_LINK.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉`
+`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。その中の SETUP_LINK.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉 合言葉: 〈合言葉〉`
 「最後に、このリンクを押して、出てきた画面で Enter を押してください。新しいタブで開きます。そこから先は、その画面の私が仕上げます。この画面は閉じても残しても大丈夫です（もう使いません）→ 〈リンク〉」
 - このセッションの仕事はここまで（まだ WordPress の鍵が無いので記録はしまわない。答えはリンクの文に入っている）。
 
 ## 7. 接続の確認（新しいセッション。`ichigyo_AI_SETUP.md` 12章 S8 のゲート）
-- まず R章（全部）。`STATE_OK` が出るか `python3 -I /tmp/kit/ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
+- まず、環境に `ICHIGYO_PASS` があるか名前だけ確かめる（`[ -n "$ICHIGYO_PASS" ] && echo PASS_SET`）。無ければ最初の文の `合言葉:` の後ろを `export ICHIGYO_PASS=...`（表示しない）で使い、`update_environment` で環境にも入れる（お客さんは許可のボタンだけ）。お客さんに合言葉を入れてもらう文は書かない。
+- それから R章（全部）。`STATE_OK` が出るか `python3 -I /tmp/kit/ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - **ブログのサーバーが海外からのつながりを止めている**（WordPress の確認で 403、または『国外IP』『アクセス制限』の画面が返る）ときは、サーバーの種類を調べて（ネームサーバー・管理画面の作り）、1通で案内する。図解のページができたら、その URL を付ける。
   - エックスサーバー／シンレンタルサーバー：「1. https://secure.xserver.ne.jp/xapanel/login/xserver/ でログイン → 2.『サーバー管理』→『WordPress』の欄の『WordPressセキュリティ設定』→ 3. 〈ドメイン〉の『選択する』→ 4. 上のタブの『国外アクセス制限』→『REST API アクセス制限』の行だけ『OFFにする』を選ぶ（ほかはそのまま）→ 5. 右下の『設定する』（確認の画面が出たら『変更する』）」
