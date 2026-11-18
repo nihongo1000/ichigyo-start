@@ -1,0 +1,18 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>ichigyo サーチコンソール接続</title></head><body style="margin:0;padding:16px;font-family:sans-serif;background:#f5f7fa">
+<div id="ichigyo-sc" style="max-width:640px;margin:24px auto;padding:24px;border:3px solid #1a73e8;border-radius:12px;font-size:18px;line-height:1.8;background:#fff">
+<p id="sc-ok" style="display:none;margin:0 0 12px"><strong>あと少しです。</strong><br>下の青い『コピー』を押して、Claude の画面（チャット）に貼り付けて送ってください。</p>
+<div id="sc-box" style="display:none">
+<textarea id="sc-code" readonly rows="3" style="width:100%;font-size:14px;padding:8px;border:1px solid #999;border-radius:6px"></textarea>
+<button id="sc-copy" type="button" style="margin-top:12px;width:100%;padding:16px;font-size:22px;font-weight:bold;color:#fff;background:#1a73e8;border:none;border-radius:8px;cursor:pointer">コピー</button>
+<p id="sc-done" style="display:none;color:#188038;font-weight:bold;margin:12px 0 0">コピーしました。Claude の画面に戻って、入力欄に貼り付けて送ってください（このページは閉じて大丈夫です）。</p>
+</div>
+<p id="sc-ng" style="display:none;margin:0">うまく受け取れませんでした。Claude の画面に戻って「もう一度」と送ってください。</p>
+<p id="sc-none" style="margin:0">このページは、ichigyo でサーチコンソールをつなぐときに使うページです。</p>
+</div>
+<script>
+(function(){var q=new URLSearchParams(location.search),c=q.get('code'),$=function(i){return document.getElementById(i)};
+if(c){$('sc-none').style.display='none';$('sc-ok').style.display='block';$('sc-box').style.display='block';$('sc-code').value='ichigyo-sc:'+c;
+$('sc-copy').onclick=function(){var t=$('sc-code');t.select();var ok=function(){$('sc-done').style.display='block'};if(navigator.clipboard){navigator.clipboard.writeText(t.value).then(ok,function(){document.execCommand('copy');ok()})}else{document.execCommand('copy');ok()}};}
+else if(q.get('error')){$('sc-none').style.display='none';$('sc-ng').style.display='block';}})();
+</script>
+</body></html>
