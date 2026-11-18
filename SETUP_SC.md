@@ -74,7 +74,7 @@
 
 ## 5. 通信先を足す
 `update_environment`（許可の枠）で通信先に `searchconsole.googleapis.com` と `oauth2.googleapis.com` を足す。プロパティが分かっていれば、環境の設定に `GSC_SITE`（`sc-domain:〈ドメイン〉` か `〈WP_SITE〉/`）も入れる。
-鍵は、あとから始めたセッションにしか入らないので、`SETUP_LINK.md` 6章の形のリンクをお客さんに渡す（prompt は「SETUP_SC.md の6章から続けてください。すべて日本語で書いてください。」）。
+鍵は、あとから始めたセッションにしか入らないので、`SETUP_LINK.md` 6章の形のリンクをお客さんに渡す（prompt は「GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。その中の SETUP_SC.md の6章から続けてください。すべて日本語で書いてください。」。`repositories=` が効かない画面もあるので、最初の文は省かない）。
 
 ## 6. 確認（新しい担当の画面）
 - R章 → `python3 $KIT/scripts/gsc_fetch.py check`（中身は表示しない。OK と件数だけ）。
