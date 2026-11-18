@@ -1,6 +1,6 @@
 # ichigyo 後付け：サーチコンソールを見て直すリライト（上級者向けの追加）
 
-版: 2026-11-18 v1.1（この行が無い古いファイルは使わない）
+版: 2026-11-18 v1.2（この行が無い古いファイルは使わない）
 
 使う場面：基本のセットアップ（`SETUP_LINK.md`）が終わった担当の画面で、お客さんが「サーチコンソールもつなぎたい」と送ったとき。
 `SETUP_LINK.md` の0章（日本語だけ・専門用語を使わない・鍵をチャットに貼らせない・質問は最小）とR章（毎回の準備）がこのファイルにもそのまま効く。
@@ -73,7 +73,7 @@
 - 複数行の値が保存できない環境だった場合（7章の確認で `ENV_MISSING` や `json` の読み込みエラー）：保存を断られた・1行目しか入らないときは、この方法をやめて、お客さんには何もさせず「つなぐ方法を見直します」とだけ伝え、STATE.md に `SC_BLOCKED multiline` と書いて終わる（作り手が別の方法を用意する）。
 
 ## 5. 通信先を足す
-`update_environment`（許可の枠）で通信先に `searchconsole.googleapis.com` と `oauth2.googleapis.com` を足す。プロパティが分かっていれば、環境の設定に `GSC_SITE`（`sc-domain:〈ドメイン〉` か `〈WP_SITE〉/`）も入れる。
+通信先に `searchconsole.googleapis.com` と `oauth2.googleapis.com` が無ければ、`update_environment`（許可の枠）で Claude が足す。**お客さんに『許可するドメイン』などの設定画面を開かせて書き足させることは、しない**（`update_environment` が使えないときは、6章のリンクで開いた新しい画面から `update_environment` をやり直す）。プロパティが分かっていれば、環境の設定に `GSC_SITE`（`sc-domain:〈ドメイン〉` か `〈WP_SITE〉/`）も入れる。
 鍵は、あとから始めたセッションにしか入らないので、`SETUP_LINK.md` 6章の形のリンクをお客さんに渡す（prompt は「GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。その中の SETUP_SC.md の6章から続けてください。すべて日本語で書いてください。」。`repositories=` が効かない画面もあるので、最初の文は省かない）。
 
 ## 6. 確認（新しい担当の画面）
