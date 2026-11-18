@@ -1,29 +1,32 @@
 # ichigyo はてなブログ版：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-18 hatena v1.1（この行が無い古いファイルは使わない）
+版: 2026-11-19 hatena v2.0（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
-最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_HATENA_PASS` に入っている）。このリポジトリ（公開）の `hatena/` には、この指示書・鍵のかかった部品 `hatena_set.enc`・記録の道具 `hatena_state.py` だけがある。
+最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_HATENA_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` の `hatena/` には、この指示書・鍵のかかった部品 `hatena_set.enc`・記録の道具 `hatena_state.py`・サーチコンソール用の `sc_login.py` と `sc_client.enc` だけがある。
+**このリポジトリが画面につながっていないことがある**（リンクの指定が効かず、お客さんの別のリポジトリだけがつながっている、など）。そのときもお客さんに何も聞かず、`git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start` で取って進める（R章の0も公開リポジトリから直接取る）。お客さんの別のリポジトリ（ichigyo-start 以外）は、読まない・変えない・使わない。
 お客さんのパソコンは使わない。お客さんにファイルを扱わせない。**お客さん用の GitHub の置き場所は作らない（頼まない）。** 記録はお客さんのはてなブログの **下書き1本** にしまう（`hatena_state.py`）。
 リポジトリの最上位にある `SETUP_LINK.md` などは WordPress 版のもの。**はてなブログ版では読まない・使わない。**
-（テスト中だけ）画面のフォルダに `hatena/` が無いときは、環境の設定の `ICHIGYO_KIT_REF` を使う。**環境に無いときは、最初の文の `ICHIGYO_KIT_REF=〈枝の名前〉`（無ければ最初の文に書かれた枝の名前）を使い、以後このセッションのコマンドでは毎回 `export ICHIGYO_KIT_REF=〈枝の名前〉` を先に付ける**（R章の0がこの値で枝を読むため。付け忘れると main を読み、`hatena/` が無くて止まる）。この指示書は `git fetch -q origin "$ICHIGYO_KIT_REF" && git show FETCH_HEAD:hatena/SETUP_HATENA.md` で読む。4章の環境の設定には `ICHIGYO_KIT_REF` も入れ、6章の続きのリンクと9章の定期実行の指示文にも、同じ読み方を1文で足す。
+（テスト中だけ）最初の文に `ICHIGYO_KIT_REF=〈枝の名前〉` があるときは、その枝を読む。**以後このセッションのコマンドでは毎回 `export ICHIGYO_KIT_REF=〈枝の名前〉` を先に付ける**（R章の0がこの値で枝を取るため。付け忘れると main を読む）。この指示書も `git clone -q --depth 1 -b 〈枝の名前〉 https://github.com/nihongo1000/ichigyo-start.git /tmp/hkitrepo` で取った `/tmp/hkitrepo/hatena/SETUP_HATENA.md` で読む。4章の環境の設定には `ICHIGYO_KIT_REF` も入れる（2回目からの画面と定期実行は、環境の値で枝を読む）。
 
 ## 0. いちばん大事な決まり（どの手順より優先）
 - **このセッションでは、最初から最後まで日本語だけを使う。** お客さんへの返事・作業中のひとりごと・途中経過・定期実行の報告のどれも、英語にしない（英語が1文でも出たら、次の文から日本語に戻す）。
 - **重い作業は下請け（サブエージェント）に出す（使用量を減らすため。R章より先に読む）。** 担当の画面は、記事を書くたびに会話が長くなり、道具を1回使うたびに全部を読み直すので、1本あたりの使用量がどんどん増える。そこで次の作業は、Agent ツール（subagent_type は general-purpose、model は指定しない）に任せる。
   - 任せる作業：8章の 8-2（話し方づくり）から試し記事と 8-3 まで／10-1 の「今すぐ1本」／定期実行の新記事・リライト案（サーチコンソール版の自動リライトも）・キーワード補充と報告
-  - 渡す文：「【下請け】`<このリポジトリの場所>/hatena/SETUP_HATENA.md` の0章とR章を読み、R章を実行してから、〈やること。定期実行ならその指示文をそのまま〉。新記事は 8-3 も通す。終わりは R章の『終わり』（commit → `hatena_state.py push`、`STATE_SAVED`）まで必ず行う。最後に、下書きの ID・タイトル・画像の枚数と今月の画像代・`STATE_SAVED` が出たか・お客さんに伝えることを、日本語10行以内で返す」
+  - 渡す文：「【下請け】`/tmp/hkit/SETUP_HATENA.md`（無ければ `/home/user/ichigyo-start/hatena/SETUP_HATENA.md`）の0章とR章を読み、R章を実行してから、〈やること。定期実行ならその指示文をそのまま〉。新記事は 8-3 も通す。終わりは R章の『終わり』（commit → `hatena_state.py push`、`STATE_SAVED`）まで必ず行う。最後に、下書きの ID・タイトル・画像の枚数と今月の画像代・`STATE_SAVED` が出たか・お客さんに伝えることを、日本語10行以内で返す」
   - この画面では、返ってきた内容から、お客さんへの文（日本語・短く）だけを書く。`STATE_SAVED` が無いときや失敗したときは、そのことも1行で書く。
   - **渡された文が【下請け】で始まるとき（あなたが下請けのとき）は、この項目を飛ばして、自分で最後までやる**（さらに下請けに出さない）。Agent ツールが無いときも、この画面で直接やる。
 - お客さんはパソコン初心者。**専門用語が1つでも出ると、そこで混乱して止まる。** 次の言葉はお客さんへの文に出さない：コマンド、リポジトリ、ブランチ、main、git、push、コミット、フック、環境変数（画面の名前として『環境変数』を押してもらうときだけ可）、API（画面の名前として『APIキー』『AtomPub』を見てもらうときだけ可）、Python、セッション、エンドポイント（画面の名前として『ルートエンドポイント』を見てもらうときだけ可）、Markdown（画面の名前として『Markdownモード』を押してもらうときだけ可）、ファイル名・章の名前・手順書。画面に出る言葉は「画面の『〇〇』」とそのまま書く。
 - **内部の値や判断の理由を見せない。** 次に押すものだけを書く。
 - **Claude Code の自動の確認（『送っていない変更がある』などのフック）には、お客さんへの文で答えない。** 黙って直すか無視する。
-- **質問は3章の1通と、9章の回数の1通だけ。** それ以外は聞かずに自分で確かめて進める。迷ったら標準を選び、選んだことを1行で書く。
+- **質問は3章の1通と、9章の回数の1通だけ**（10章のキーワードの説明は、返事を待たない案内）。それ以外は聞かずに自分で確かめて進める。迷ったら標準を選び、選んだことを1行で書く。
 - お客さんに頼むのは：許可の枠のボタン／はてな・Meta のログイン／カード入力／画面の「コピー」／鍵を設定の欄に貼って「保存」／Claude が渡すリンクを押して Enter／（必要なときだけ）はてなの編集モードの切りかえ。これ以外は頼まない。
 - 1通に、続けてできる操作を番号つきでまとめる。押したら「できた」と送ってもらう。返事を待つ文はいちばん最後に置く。
 - **新記事は毎回、道具で作ったあとに 8-3 の『日本語の仕上げ』を通す**（試し記事・定期実行・10-1 のどれも）。
 - 作業の中身（ファイル名、件数、手順番号、PASS/FAIL）は書かない。見せるのは「次に押すもの」と「あと何をすれば終わるか」だけ。
 - **合言葉・鍵（はてなの APIキー・Muse のキー・サーチコンソールの鍵のファイル）は表示しない・ファイルに書かない・チャットに貼らせない。** 鍵はクラウド環境の設定にだけ置く（お客さんが自分で貼る）。
+- **合言葉は、お客さんに打ち込ませない・聞かない（どの章でも）。** 環境の `ICHIGYO_HATENA_PASS` に無ければ、最初の文の `合言葉:` から取り、`update_environment`（許可の枠）で入れる。どちらにも無いときだけ「最初に届いた開始リンクを、もう一度押してください」と1行書く。
+- **お客さんに、環境の設定画面を開いて何かを書き足させるのは、5章の鍵2つだけ。** サーチコンソールの鍵も、Claude が `update_environment` で入れる（お客さんは許可のボタンだけ）。
 - **鍵をコピーしてから貼るまでの間は、ほかの文をコピーさせない**（クリップボードの鍵が消える）。
 - **新記事は必ず下書き。** 公開はお客さん。リライトは案だけ。お客さんが「反映して」と言うまで直さない（サーチコンソールをつないで、お客さんが『自動でOK』と送ったあとだけ、`SETUP_SC_HATENA.md` 7-5 のとおり自動で直す）。
 - **記録の下書き**（タイトル『ichigyo の記録（公開しないでください・消さないでください）』）は、記事の一覧に数えない・選ばない・直さない。
@@ -34,8 +37,8 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
-# 0. 最新の手順書と部品を、画面のフォルダを変えずに /tmp/hkit に取る（画面の枝は動かさない）
-cd "$(git rev-parse --show-toplevel)" && R=/tmp/hkit && rm -rf $R && mkdir -p $R; REF=${ICHIGYO_KIT_REF:-main}; ok=1; git fetch -q origin "$REF" || ok=0; for f in SETUP_HATENA.md SETUP_SC_HATENA.md hatena_state.py hatena_set.enc; do [ $ok = 1 ] && { git show "FETCH_HEAD:hatena/$f" > "$R/$f" || ok=0; }; done; if [ $ok = 1 ]; then echo KIT_LATEST; else cp hatena/SETUP_HATENA.md hatena/SETUP_SC_HATENA.md hatena/hatena_state.py hatena/hatena_set.enc $R/; echo KIT_NOT_UPDATED; fi
+# 0. 最新の手順書と部品を、公開リポジトリから /tmp/hkit に直接取る（画面にこのリポジトリが無くても動く。画面のフォルダは変えない）
+R=/tmp/hkit && rm -rf $R /tmp/hkitrepo && mkdir -p $R; F='SETUP_HATENA.md SETUP_SC_HATENA.md hatena_state.py hatena_set.enc sc_login.py sc_client.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_REF:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/hkitrepo && (cd /tmp/hkitrepo/hatena && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/hatena/hatena_set.enc /home/user/*/hatena/hatena_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
 PY=$(command -v python3.13 || command -v python3); $PY -m pip install -q requests pillow google-auth
 rm -rf /tmp/hset && mkdir -p /tmp/hset
 # 1. 合言葉：2回目からは環境の ICHIGYO_HATENA_PASS。環境に無いとき（初回）は export ICHIGYO_HATENA_PASS='<最初の文の合言葉>'（表示しない）
@@ -73,9 +76,10 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 ## 4. 通信の設定を作る（お客さんは許可のボタンだけ）
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前は「ichigyo はてな 〈ドメイン〉」（例：ichigyo はてな example.hatenablog.com。同じ名前が使われていれば、そのブログの続きなので6章のリンクから再開する）。以下この名前を〈環境の名前〉と書く、scope personal、`switch_session` は none。
-   - 通信先：`blog.hatena.ne.jp`、`f.hatena.ne.jp`、ブログのドメイン、`api.meta.ai`、`suggestqueries.google.com`
-   - 設定：`HATENA_ID`、`HATENA_BLOG_ID`、`ICHIGYO_HATENA_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。チャットの文には書かない）、`HATENA_API_KEY`（空）、`MUSE_API_KEY`（空）、（テスト中だけ）`ICHIGYO_KIT_REF`（最初の文または環境の値）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、HATENA_API_KEY= と打ってから」を足す
+   - 通信先：`blog.hatena.ne.jp`、`f.hatena.ne.jp`、ブログのドメイン、`api.meta.ai`、`suggestqueries.google.com`、`searchconsole.googleapis.com`・`oauth2.googleapis.com`（あとでサーチコンソールをつないだとき、通信先を足し直さずに済むよう、最初から入れておく）
+   - 設定：`HATENA_ID`、`HATENA_BLOG_ID`、`ICHIGYO_HATENA_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。お客さん自身の開始リンクにすでに入っている文字なので、許可の枠に出ても問題ない。チャットの文には書かない）、`HATENA_API_KEY`（空）、`MUSE_API_KEY`（空）、（テスト中だけ）`ICHIGYO_KIT_REF`（最初の文または環境の値）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、HATENA_API_KEY= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
+- 5章の文に、ICHIGYO_HATENA_PASS を打ち込ませる手順を足さない（打ちまちがいで7章が止まるため）。6章の続きのリンクの文の最後には、いつも `合言葉: 〈合言葉〉` を付ける（この枠で入らなかったときや、環境の設定が消えたときに、7章で `update_environment` で入れ直すため）。
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
 
@@ -101,13 +105,15 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 `DONE 5`。
 
 ## 6. 続きのリンクを渡す（鍵は、あとから始めたセッションにしか入らないため）
-次の形でリンクを作り（値はURL用に変換する）、お客さんへ1通：
-`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=hatena/SETUP_HATENA.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉`
+次の形でリンクを作り（値はURL用に変換する。`repositories=` が効かない画面もあるので、prompt の最初の文は必ず残す）、お客さんへ1通：
+`https://claude.ai/code?environment=<環境の名前>&repositories=nihongo1000/ichigyo-start&prompt=ichigyo はてなブログ版の続きです。GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。その中の hatena/SETUP_HATENA.md の7章から続けてください。お客さんへの文も途中経過も、すべて日本語で書いてください。答え: 〈3章の答えの1行〉 合言葉: 〈合言葉〉`
+（テスト中は、prompt の最初に `ICHIGYO_KIT_REF=〈枝の名前〉。` を足し、clone の文を `git clone -b 〈枝の名前〉 …` にする）
 「最後に、このリンクを押して、出てきた画面で Enter を押してください。新しいタブで開きます。そこから先は、その画面の私が仕上げます。この画面は閉じても残しても大丈夫です（もう使いません）→ 〈リンク〉」
 - このセッションの仕事はここまで（まだ鍵が無いので記録はしまわない）。
 
 ## 7. 接続の確認（新しいセッション）
-- まず R章（全部）。`$A check` で `AUTH_OK` を確かめる。最初の指示の文の `答え:` の後ろを `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `$W/ichigyo/STATE.md` に足して push（R章の終わり）。
+- まず、環境に `ICHIGYO_HATENA_PASS` があるか名前だけ確かめる（`[ -n "$ICHIGYO_HATENA_PASS" ] && echo PASS_SET`）。無ければ最初の文の `合言葉:` の後ろを `export ICHIGYO_HATENA_PASS=...`（表示しない）で使い、`update_environment` で環境にも入れる（お客さんは許可のボタンだけ）。お客さんに合言葉を入れてもらう文は書かない。
+- それから R章（全部）。`$A check` で `AUTH_OK` を確かめる。最初の指示の文の `答え:` の後ろを `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `$W/ichigyo/STATE.md` に足して push（R章の終わり）。
 - push の `STATE_SAVED … syntax=` が `text/x-markdown` でなければ、ブログの編集モードが Markdown ではない。お客さんへ1通：「1. このリンクを押してください → https://blog.hatena.ne.jp/〈はてなID〉/〈ブログID〉/config 2.『編集モード』で『Markdownモード』を選び、いちばん下の『変更する』を押してください。できたら『できた』と送ってください」。『できた』のあとでもう一度 push して `syntax=text/x-markdown` を確かめる。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - 失敗したとき（1通だけ）：
@@ -156,7 +162,7 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 
 **9-1. 作る**
 - 「新記事（9-0 の回数・朝6時台）」「キーワード補充（日曜。新記事が毎日なら水曜と日曜）」、リライトを選んだら「リライト案（9-0 の回数。新記事と違う曜日・時刻）」を、**このセッションに向けて** `create_trigger` で作る。間は1時間以上、分は 00/30 を避ける。時刻はお客さんの国の朝。
-- 指示文の最初に「`hatena/SETUP_HATENA.md` の0章とR章を読み、R章を実行してから、12章の〈新記事／キーワード補充／リライト案〉を行う。新記事は 8-3 の日本語の仕上げも通す。最後に R章の『終わり』（commit → `hatena_state.py push`、`STATE_SAVED`）を必ず行う」。
+- 指示文の最初に「GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。R章の0で取った `/tmp/hkit/SETUP_HATENA.md`（取る前は `/home/user/ichigyo-start/hatena/SETUP_HATENA.md`）の0章とR章を読み、R章を実行してから、12章の〈新記事／キーワード補充／リライト案〉を行う。新記事は 8-3 の日本語の仕上げも通す。最後に R章の『終わり』（commit → `hatena_state.py push`、`STATE_SAVED`）を必ず行う」。
 - 作ったら確かめる。ただし新記事は8章の試し記事で確かめ済みなので、新記事の予約は手動で動かさない（下書きが1日に2本入らないように）。キーワード補充の予約は1回だけ手動で動かしてよい。結果を `STATE.md` に書いて push。
 - 鍵をあとで変えたら、6章の形のリンクで新しいセッションを開いてもらい、そこで定期実行を作り直す。
 `DONE 9` → push。
@@ -165,14 +171,24 @@ cp -r $W/site/. $W/hatena_auto/ 2>/dev/null && echo OVERLAY_OK
 - 先に `set_session_title` でこの画面の名前を「〈環境の名前〉 担当（消さないでください）」にする。
 「設定が終わりました。〈曜日〉の朝に、記事が1本ずつ下書きに入ります（回数を変えたいときは、いつでもこの画面で『回数を変えて』と送ってください）（パソコンは消えていても大丈夫です）。これからは、claude.ai/code の左の一覧にある『〈環境の名前〉 担当（消さないでください）』がこのブログの担当の画面です。報告もここに届き、相談もここでできます。もしこの画面が止まったり重くなったりしたら、最初の開始リンクをもう一度押してください。設定はブログ側に残っているので、新しい担当の画面にそのまま引き継ぎます。下書きははてなブログの『記事の管理』→『下書き』で確認して、良ければ『公開する』を押してください。画像の費用は1本あたり約〇円です。Google での順位を見て古い記事を直すようにしたいときは、この画面で『サーチコンソールにつないで』と送ってください。下書きにある『ichigyo の記録（公開しないでください・消さないでください）』は、設定と記録の保管用なので、公開も削除もしないでください」
 - 3章の5があれば、その前に「〈ツール〉を止めてください（二重に投稿されるため）」。
+- あいさつのすぐあとに、もう1通（キーワードの説明。返事は待たない）：
+「最後に、記事にするキーワードについてです。
+・ラッコキーワードで調べたキーワードの一覧があれば、この画面にそのまま貼り付けてください。次に書く記事の候補に足します
+・ラッコキーワードの有料版をお持ちなら、ラッコを Claude とつなぐと、検索数を見ながら自動でキーワードを集めるようになります。つなぎたいときは、この画面で『ラッコをつないで』と送ってください
+・どちらも無ければ、AI がネットで調べて自動でキーワードを足していきます。この場合、検索数（どれだけ調べられているか）やキーワードの難しさは分かりません」
 
 ## 10-1. お客さんが「今すぐ1本書いて」と送ったとき（担当の画面）
 - 「新しい記事を書いて」「今すぐ1本」などは、12章の新記事と同じ手順で1本だけ作る（R章から。下書き）。定期実行そのものは押して動かさない（1日に2本になるため）。
 - 「書き直して」「この記事を直して」は、直す案だけを送る。「反映して」と言われたら直す（12章のリライト案の最後）。
 
 ## 10-2. お客さんが「サーチコンソールにつないで」と送ったとき（担当の画面）
-- 「サーチコンソール」「連携」「順位を見て直して」などは、`hatena/SETUP_SC_HATENA.md`（R章のあとは `/tmp/hkit/` の最新）を読み、その1章から行う。0章の決まりはそのまま。
+- 「サーチコンソール」「連携」「順位を見て直して」などは、`/tmp/hkit/SETUP_SC_HATENA.md`（R章で取った最新）を読み、その0章から行う。0章の決まりはそのまま。
 - 「〈記事〉を元に戻して」は `SETUP_SC_HATENA.md` 7-2 の戻し方。「自動でOK」「自動はやめて」は 7-5。
+
+## 10-3. お客さんがキーワードを貼ったとき・「ラッコをつないで」と送ったとき（担当の画面）
+- キーワードの一覧が貼られたら（ラッコの書き出し・メモ・1行1語のどれでも）：語だけを取り出し、検索数・難しさの列があれば `memo` に `vol=〇 kd=〇` として、`$W/site/keywords_queue.csv` の **上（次に書く順）** に足す。公開記事・在庫と同じ意味の語は足さない。R章の終わりまで行い、「〇個を、次に書く記事の候補に足しました」と1行。
+- 「ラッコをつないで」：WebSearch でラッコキーワード公式の「MCP」の説明ページを探し、その手順をお客さんの画面の言葉で、番号つきの1通にする（claude.ai の『設定』→『コネクタ』から足す形）。つないだあとの最初の新記事・キーワード補充の前に、ラッコの道具が使えるか確かめ、使えたら `STATE.md` に `RAKKO_ON <日付>`。以後 8章・12章のキーワード選びは、ラッコで検索数を見て選ぶ。
+- ラッコの有料版が無い人には、つなぐことを勧めない（無くても自動で回る）。
 
 ## 11. 作り直し（担当の画面が止まった・消えた・重くなったとき）
 - お客さんが開始リンクをもう一度押したとき、1章のあと、同じ名前の環境（〈環境の名前〉）がもうあれば、3章の質問はせずに6章の続きのリンクだけ渡す。
