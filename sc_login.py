@@ -17,7 +17,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REDIRECT = 'https://nihongo1000.wpx.jp/ichigyo-sc/'
+REDIRECT = 'https://ichigyo.com/sc/'
 SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
 OUT = Path('/tmp/kit/gsc_user.json')
 
