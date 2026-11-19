@@ -21,6 +21,9 @@ MAX_FILE = 300_000
 # キットの写し（毎回 R章で置き直す）はしまわない。ブログに部品の中身を置かないため
 SKIP_PATHS = {"ichigyo/ichigyo_AI_SETUP.md", "ichigyo/SETUP_LINK.md"}
 SKIP_PREFIX = ("tools/rewrite/",)
+# キットの持ち物（採点表・文章の決まり・記事の型のひな形）。毎回 R章で最新を置くので、しまわない。
+# 前にしまった古い版が記録に残っていても、取り出すときに最新の部品を上書きしない
+KIT_OWNED = ("wp_auto/style/ichigyo_", "wp_auto/prompts/article_types/")
 MAX_TOTAL = 4_000_000
 SECRET_VARS = ("WP_APP_PASSWORD", "MUSE_API_KEY", "GSC_SA_JSON", "ICHIGYO_PASS", "RAKKO_API_KEY")
 
@@ -89,7 +92,7 @@ def pack(work):
             for f in sorted(files):
                 p = os.path.join(root, f)
                 rel = os.path.relpath(p, work).replace(os.sep, "/")
-                if rel in SKIP_PATHS or rel.startswith(SKIP_PREFIX):
+                if rel in SKIP_PATHS or rel.startswith(SKIP_PREFIX) or rel.startswith(KIT_OWNED):
                     continue
                 if not f.endswith(KEEP_EXT) or os.path.getsize(p) > MAX_FILE:
                     continue
@@ -146,6 +149,8 @@ def pull(work):
     with tarfile.open(fileobj=io.BytesIO(blob)) as tar:
         for m in tar.getmembers():
             if not m.isfile() or m.name.startswith(("/", "..")) or "/../" in m.name:
+                continue
+            if m.name.replace("\\", "/").lstrip("./").startswith(KIT_OWNED):
                 continue
             if hasattr(tarfile, "data_filter"):
                 tar.extract(m, work, filter="data")
