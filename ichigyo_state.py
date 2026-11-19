@@ -10,7 +10,7 @@
 鍵は環境の設定から読む: WP_SITE（無ければ WP_URL）, WP_USER, WP_APP_PASSWORD。
 鍵の値は表示しない。しまう前に、鍵の値が記録に混じっていないか確かめる。
 """
-import base64, hashlib, io, json, os, sys, tarfile, urllib.error, urllib.parse, urllib.request
+import base64, hashlib, io, json, os, re, sys, tarfile, urllib.error, urllib.parse, urllib.request
 
 SLUG = "ichigyo-state"
 TITLE = "ichigyo の記録（消さないでください・非公開）"
@@ -33,18 +33,32 @@ def die(msg):
     sys.exit(1)
 
 
+# 環境の設定の見本（「ここに〇〇を貼る」）。見本だけなら空と同じ、見本の後ろに貼ってあれば知らせる
+PASTE_VARS = ("WP_APP_PASSWORD", "MUSE_API_KEY", "PLACES_API_KEY", "MAPS_EMBED_KEY")
+HINT = re.compile(r"ここに.*?を?貼る")
+
+
+def env(v):
+    val = os.environ.get(v, "").strip()
+    if HINT.search(val) or "ここに" in val:
+        if HINT.sub("", val).replace("ここに", "").strip():
+            die(f"ENV_LEFTOVER {v}")
+        return ""
+    return val
+
+
 def site():
     s = (os.environ.get("WP_SITE") or os.environ.get("WP_URL") or "").strip().rstrip("/")
     if not s:
         die("ENV_MISSING WP_SITE")
     for v in ("WP_USER", "WP_APP_PASSWORD"):
-        if not os.environ.get(v, "").strip():
+        if not env(v):
             die(f"ENV_MISSING {v}")
     return s
 
 
 def auth():
-    raw = f"{os.environ['WP_USER'].strip()}:{os.environ['WP_APP_PASSWORD'].strip()}"
+    raw = f"{os.environ['WP_USER'].strip()}:{env('WP_APP_PASSWORD')}"
     return "Basic " + base64.b64encode(raw.encode()).decode()
 
 
@@ -106,6 +120,8 @@ def pack(work):
         text = b"".join(tar.extractfile(m).read() for m in tar.getmembers() if m.isfile())
     for v in SECRET_VARS:
         val = os.environ.get(v, "").strip()
+        if "ここに" in val:
+            continue
         if len(val) >= 8 and (val.encode() in text or val.replace(" ", "").encode() in text):
             die(f"FAIL secret_in_state {v}")
     return blob
@@ -171,6 +187,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("pull", "push", "check"):
         die(__doc__)
     if sys.argv[1] == "check":
+        for v in PASTE_VARS:
+            env(v)
         check()
     elif len(sys.argv) < 3:
         die(__doc__)
