@@ -17,7 +17,7 @@
 
 ## 1. 鍵の置き場所を作る（お客さんは許可のボタンだけ）
 - 環境の設定に `PLACES_API_KEY` と `MAPS_EMBED_KEY` の名前がもうあり（`env | cut -d= -f1` で名前だけ見る）、`curl -s -o /dev/null -m 15 -w '%{http_code}' https://places.googleapis.com/` が `000`・`403` でなければ、この章は飛ばして2章へ（新しい `SETUP_LINK.md` の4章で最初から作ってある）。
-1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
+1. 予告：「このあと確認の枠が出ます。いちばん下までスクロールして、黒い『環境を更新』のボタンを押してください」
 2. `update_environment`（〈環境の名前〉）で：
    - 設定：`PLACES_API_KEY`＝`ここにGoogleの調べる用の鍵を貼る` と `MAPS_EMBED_KEY`＝`ここにGoogleの地図用の鍵を貼る` を足す（見本の文字。空を断られることもない）。**ほかの設定は消さない・変えない**
    - 通信先：`places.googleapis.com`・`www.google.com`・`www.googleapis.com`（お店の公式サイトのキャプチャを、Google のページを調べるサービスに撮ってもらうため）・`maps.googleapis.com`（キャプチャが撮れないお店のストリートビューを、お店の方へ向けるため）を足す（ほかは消さない）
