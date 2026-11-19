@@ -49,7 +49,7 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md SETUP_MAP.md ichigyo_state.py ichigyo_set.enc sc_login.py sc_client.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
-# 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
+# 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）、または下の openssl が環境の値で失敗したとき（欄に見本や別の文字が入っている）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）でもう一度。それで開けたら、7章の update_environment で環境の欄もその値に直す（お客さんは許可のボタンだけ）
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in $R/ichigyo_set.enc -out /tmp/set/set.zip -pass env:ICHIGYO_PASS 2>/dev/null
 python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall('/tmp/set')" /tmp/set/set.zip && echo SET_OK
 S=/tmp/set/ichigyo_SET_v5
@@ -129,7 +129,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 - このセッションの仕事はここまで（まだ WordPress の鍵が無いので記録はしまわない。答えはリンクの文に入っている）。
 
 ## 7. 接続の確認（新しいセッション。`ichigyo_AI_SETUP.md` 12章 S8 のゲート）
-- まず、環境に `ICHIGYO_PASS` があるか名前だけ確かめる（`[ -n "$ICHIGYO_PASS" ] && echo PASS_SET`）。無ければ最初の文の `合言葉:` の後ろを `export ICHIGYO_PASS=...`（表示しない）で使い、`update_environment` で環境にも入れる（お客さんは許可のボタンだけ）。お客さんに合言葉を入れてもらう文は書かない。
+- まず、環境に `ICHIGYO_PASS` があるか名前だけ確かめる（`[ -n "$ICHIGYO_PASS" ] && echo PASS_SET`）。あっても R章の openssl がその値で失敗するとき（欄に見本の文字や別の文字が入っている）は、無いときと同じに扱う。無ければ最初の文の `合言葉:` の後ろを `export ICHIGYO_PASS=...`（表示しない）で使い、`update_environment` で環境にも入れる（お客さんは許可のボタンだけ）。お客さんに合言葉を入れてもらう文は書かない。
 - それから R章（全部）。`STATE_OK` が出るか `python3 -I /tmp/kit/ichigyo_state.py check` で確かめる（401 なら下の WordPress 401 と同じ）。最初の指示の文の `答え:` の後ろ（無ければ環境の設定の `ICHIGYO_ANSWERS`）を `$W/ichigyo/ANSWERS.md` に書き写し、`DONE 1`〜`DONE 6` を `STATE.md` に足して push。サーチコンソールとラッコは最初は無くてよい（`ENV_MISSING GSC_SA_JSON` は失敗に数えない）。
 - 鍵の値は確かめるときも表示しない。確認は名前と個数だけ。
 - **ブログのサーバーが海外からのつながりを止めている**（WordPress の確認で 403、または『国外IP』『アクセス制限』の画面が返る）ときは、サーバーの種類を調べて（ネームサーバー・管理画面の作り）、1通で案内する。図解のページができたら、その URL を付ける。
