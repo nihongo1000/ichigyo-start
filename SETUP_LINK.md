@@ -24,7 +24,7 @@
 - **画面に出る文はすべて日本語**（作業中のひとりごと・途中経過も英語にしない。お客さんは全部読む）。
 - 1通に、続けてできる操作を番号つきでまとめる。押したら「できた」と送ってもらう。返事を待つ文はいちばん最後に置く。
 - **新記事は毎回、ichigyo 本体で作ったあとに 8-3 の『日本語の仕上げ』、8-4 の型、8-5 の『中身の採点と書き直し』を通す**（試し記事・定期実行・10-1 のどれも。前に作った定期実行の指示文に「8-3 を通す」としか書いていなくても、8-4・8-5 まで通す）。
-- **新記事の語を決めたら、本体を動かす前に `python3 $W/wp_auto/scripts/kw_type.py --local "<語>"` を見る**（試し記事・定期実行・10-1 のどれも）。`LOCAL=no` なら、いつもどおり本体で作る。`LOCAL=yes` のときだけ 8-6 を読んで、そのとおりにする。
+- **新記事の語を決めたら、本体を動かす前に `python3 $W/wp_auto/scripts/kw_type.py --local "<語>"` を見る**（試し記事・定期実行・10-1 のどれも）。`LOCAL=no` なら、いつもどおり本体で作る。`LOCAL=yes`・`LOCAL=one` のときだけ 8-6 を読んで、そのとおりにする（one は本体で作ってから地図を1つ足すだけ）。
 - **新記事を Claude が自分で書くのは、地域の記事（8-6。地図の設定が済んだブログだけ）だけ。** それ以外の新記事は、必ず ichigyo 本体で作る。地域の記事でも、確かめていないお店・数字・感想は1つも書かない。
 - 作業の中身（ファイル名、件数、手順番号、PASS/FAIL）は書かない。見せるのは「次に押すもの」と「あと何をすれば終わるか」だけ。
 - **合言葉は、お客さんに打ち込ませない・聞かない（どの章でも）。** 環境の `ICHIGYO_PASS` に無ければ、最初の文の `合言葉:` から取り、`update_environment`（許可の枠）で入れる。どちらにも無いときだけ「最初に届いた開始リンクを、もう一度押してください」と1行書く。
@@ -193,15 +193,18 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 - 3周で85点に届かなくても、下書きのまま進める（止めない）。お客さんへの報告に点数は書かない。届かなかったときだけ1行足す：「仕上げの点検で、直しきれない所が残りました（〈何が。例：料金が確かめられませんでした〉）。公開の前にご確認ください」。
 
 **8-6. 地域の記事（「〈地名〉 〈探すお店・施設〉」の語。地図の設定が済んだブログだけ）**
-- 見分け方：新記事の語を決めたら、本体を動かす前に `python3 $W/wp_auto/scripts/kw_type.py --local "<語>"`。`LOCAL=no` なら、いつもどおり本体で作る。`LOCAL=yes AREA=〈地名〉 WHAT=〈探すもの〉` のとき：
+- 見分け方：新記事の語を決めたら、本体を動かす前に `python3 $W/wp_auto/scripts/kw_type.py --local "<語>"`。
+  - `LOCAL=no` なら、いつもどおり本体で作る（「やめた方がいい」「解約」「後悔」などが付いた語も、お店を勧めると逆になるのでここに入る）。
+  - `LOCAL=one AREA=〈地名〉 SHOP=〈お店の名前〉`（1つのお店＋行き方・アクセス）：いつもどおり本体で作り（8-3〜8-5 も）、`MAP_DONE` と `PLACES_OK` があるときだけ、最後にそのお店の地図を1つ足す：`python3 scripts/places_fetch.py search "<SHOP> <AREA>" --out $D/places.json --max 3` → `show` で名前と住所がそのお店のものを1つ選ぶ（無ければ足さない）→ `python3 scripts/wp_post.py get <ID> $D` で本文を取り → `python3 scripts/places_fetch.py onemap $D/places.json <id> <取った.html> $D/onemap.html` → `ONEMAP_OK` なら `python3 scripts/wp_post.py update <ID> $D/onemap.html`。
+  - `LOCAL=yes AREA=〈地名〉 KIND=〈お店の種類〉 FOCUS=〈足された語〉 MODE=〈GO・COMPARE・VOICE・ANSWER〉` のとき（MODE ごとの書き方は `prompts/local_article.md` の 2b。口コミの語はレビュー版、選び方・年代の語はお悩み版の書き方を、地図版の中で使う）：
   - `STATE.md` に `MAP_DONE` が無い、または `cd $W/wp_auto && python3 scripts/places_fetch.py test` の1行目が `PLACES_OK` でない → **いつもどおり本体で作る（止めない）。** できた下書きに、実在のお店の名前・星の数・口コミの件数が出ていたら（確かめていないので）、8-4 の数字の確かめと同じやり方で、その文を選び方の話に言い直すか外す。
   - `MAP_DONE` があり `PLACES_OK` → 下の手順で、**担当の Claude が `記事.md` を書く**（本体は動かさない。本体は Google マップのお店の情報を持っていないため）。
 - 手順（`cd $W/wp_auto`。`D=generated/local_<日付>_<時刻>`）：
-  1. お店を調べる：`python3 scripts/places_fetch.py search "<AREA> <WHAT>" --out $D/places.json --max 8` → `PLACES_SAVED <数>`。`PLACES_EMPTY`・`PLACES_NG` のときは、本体で作る道へ（上と同じ）。
+  1. お店を調べる：`python3 scripts/places_fetch.py search "<AREA> <KIND>" --out $D/places.json --max 8` → `PLACES_SAVED <数>`。`PLACES_EMPTY`・`PLACES_NG` のときは、本体で作る道へ（上と同じ）。
   2. `python3 scripts/places_fetch.py show $D/places.json` で一覧を見て、探すものに合うお店だけを選ぶ（3〜8つ）。**合うお店が3つ未満なら、地域の記事にしない**（本体で作る道へ）。
   3. 公式サイトで確かめる：`python3 scripts/fact_fetch.py --keyword "<語>" --places $D/places.json --out $D/facts.md`（5〜12分。0章のとおり、外のページは鍵を渡されない別の Claude が読む）。`FACTS_NONE`・`FACTS_NG` でも止めない（そのお店の説明は、場所と種類だけになる）。メモには、お店ごとの特徴（方針・サポートのやり方・強み・どんな人が多いか など、そのお店だけのこと）と料金のかかり方、Google 以外（グルメや口コミのサイト・お店の SNS）で見られる「お店の声」が入る。**Google マップの口コミ・星は、メモにも記事にも入れない**（Google の決まりで残せない。星と件数は地図の中に出る）。
   3b. お店の写真：`python3 scripts/shop_shots.py $D/places.json $D/facts.md $D/img`（1店1〜2分）。ホームページのあるお店は、そのトップページのキャプチャ（`shot_<番号>.jpg`。もとの PC 版と同じ横1280・高さ600の比率）を作り、記事.md に入れる行（`[[IMG name=…]]`。記事では押すと公式サイトが開く）を出す。キャプチャが撮れず Instagram も無いお店は、もとの PC 版と同じく、お店の方を向けたストリートビューの行（`[[SV id=…]]`）を出す。ホームページの代わりに Instagram を使っているお店は、その Instagram を公式サイトとして扱い、押すとアカウントが開く「公式 Instagram」のカードの行（`[[IG id=…]]`）を出す（表の公式サイトの行もそのアカウント。Instagram の画面のキャプチャは撮らない：ログインの画面がかぶり、機械で集めることが Instagram の規約で禁止されているため）。`SHOTS_NOKEY`・`SHOTS_NG` でも止めない（写真なしで進める）。キャプチャは 6 の「拡大して見る」に入れ、ほぼ白い・同意の画面・広告だけのものは使わない。
-  3c. 比べる見出しとよくある質問：記事に入れるお店を決めたら `python3 scripts/local_axes.py $D/places.json $D/facts.md --region "<AREA>" --kind "<WHAT>" --ids <入れるお店の id をカンマで>`。集めたお店のデータで本当に差が出ている所（料金の幅・1回の長さ・夜の営業・休みの曜日・体験・口コミの件数・エリア など）から、地名・数字・お店の名前の入った見出しと質問を選ぶ（もとの PC 版と同じ）。ブログごとに選ぶものと言い回しが変わるので、同じ道具を使う人どうしで記事が似ない。出た行は 4 でそのまま使う（`axes.json` に残り、5 の `local_check.py` が、見出しがそのまま使われたか・「選び方・費用・体験・準備物」の決まった骨組みに戻っていないか・どの地域でも同じ答えになる質問がないか・同じブログのほかの地域の記事と後半が似すぎていないか（文字3つ組の重なり 0.30 以上で止める）を見る）。
+  3c. 比べる見出しとよくある質問：記事に入れるお店を決めたら `python3 scripts/local_axes.py $D/places.json $D/facts.md --region "<AREA>" --kind "<KIND>" --focus "<FOCUS>" --ids <入れるお店の id をカンマで>`（FOCUS が「なし」なら空で）。集めたお店のデータで本当に差が出ている所（料金の幅・1回の長さ・夜の営業・休みの曜日・体験・口コミの件数・エリア など）から、地名・数字・お店の名前の入った見出しと質問を選ぶ（もとの PC 版と同じ）。ブログごとに選ぶものと言い回しが変わるので、同じ道具を使う人どうしで記事が似ない。出た行は 4 でそのまま使う（`axes.json` に残り、5 の `local_check.py` が、見出しがそのまま使われたか・「選び方・費用・体験・準備物」の決まった骨組みに戻っていないか・どの地域でも同じ答えになる質問がないか・同じブログのほかの地域の記事と後半が似すぎていないか（文字3つ組の重なり 0.30 以上で止める）を見る）。
   4. `prompts/local_article.md` を読み、そのとおりに `$D/記事.md` を書く。**文体は、本体の新記事と同じ `$W/tools/ichigyo/my_style/speech_custom.txt`（8-2）に合わせる**（地域の記事だけ別人の文にしない）。**お店の事実は `places.json` と `facts.md` にあるものだけ。お店ごとに、ほかのお店と何が違うかを中心に書く（料金・営業時間は小さい表へ）。Google の星・口コミ・順位は書かない**（星と件数は、地図の中に Google マップが最新のものを出す。お店の声は、メモにある Google 以外のサイトのものだけ）。
   5. 検査：`python3 scripts/local_check.py $D/記事.md --facts $D/facts.md` が `LOCAL_CHECK OK` になるまで直す（最大3回。だめなら投稿せず、その語は使わないで報告に1行）。続けて `python3 scripts/md_to_wp.py $D/記事.md > $D/draft.html` → `python3 scripts/content_check.py $D/draft.html --type LIST --keyword "<語>"` と `python3 scripts/style_check.py $D/draft.html`。FAIL は `記事.md` の文を直してやり直す（最大2周）。
   6. 画像：`python3 scripts/make_images_wp.py /home/user/ichigyo/tool config_ANIME.json $D/記事.md $D/img --no-manga --catch "<14字以内>" --age "<SITE.md の読者の年代>" --local`（お店の小見出しには絵を作らない。地図が入る）。`ichigyo_AI_SETUP.md` の画像の確かめ（拡大して見る）も通す。画像に地図・お店の外観・看板の文字を描かせない。
