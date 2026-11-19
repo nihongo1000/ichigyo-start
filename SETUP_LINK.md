@@ -22,6 +22,7 @@
 - **画面に出る文はすべて日本語**（作業中のひとりごと・途中経過も英語にしない。お客さんは全部読む）。
 - 1通に、続けてできる操作を番号つきでまとめる。押したら「できた」と送ってもらう。返事を待つ文はいちばん最後に置く。
 - **新記事は毎回、ichigyo 本体で作ったあとに 8-3 の『日本語の仕上げ』、8-4 の型、8-5 の『中身の採点と書き直し』を通す**（試し記事・定期実行・10-1 のどれも。前に作った定期実行の指示文に「8-3 を通す」としか書いていなくても、8-4・8-5 まで通す）。
+- **新記事を Claude が自分で書くのは、地域の記事（8-6）だけ。** それ以外の新記事は、必ず ichigyo 本体で作る。地域の記事でも、確かめていないお店・数字・感想は1つも書かない。
 - 作業の中身（ファイル名、件数、手順番号、PASS/FAIL）は書かない。見せるのは「次に押すもの」と「あと何をすれば終わるか」だけ。
 - **合言葉は、お客さんに打ち込ませない・聞かない（どの章でも）。** 環境の `ICHIGYO_PASS` に無ければ、最初の文の `合言葉:` から取り、`update_environment`（許可の枠）で入れる。どちらにも無いときだけ「最初に届いた開始リンクを、もう一度押してください」と1行書く。
 - **合言葉・鍵（パスワード・APIキー）は表示しない・ファイルに書かない・チャットに貼らせない。** 鍵はクラウド環境の設定にだけ置く（お客さんが自分で貼る）。
@@ -44,7 +45,7 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
 # 0. 最新の手順書と部品を、公開リポジトリから直接 /tmp/kit に取る（画面につながっているリポジトリは使わない・動かさない）
-R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md ichigyo_state.py ichigyo_set.enc sc_login.py sc_client.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
+R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md SETUP_MAP.md ichigyo_state.py ichigyo_set.enc sc_login.py sc_client.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
 # 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）
@@ -172,6 +173,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
   - 足したあとも `STOCK_BIAS` のままでよい（やり直さない・止めない）。語を使って在庫が減ったあとに数え直すこともしない。
   - 足す語は、このブログのテーマで本当に検索されている語だけ（ラッコ、無ければ WebSearch で確かめる）。型をそろえるためだけの不自然な語は作らない。ちょうどよい語が見つからない型は、入れなくてよい。
   - 「口コミ・評判」「比較」「ランキング」「解約」の語は、**実在する名前（商品・サービス・お店・場所など）が入っている語だけ**。名前を作らない。確かめられない名前、すでに記事がある名前は入れない。
+  - **地域の語（「〈地名〉 〈探すお店・施設〉」。`kw_type.py --local` が `LOCAL=yes`）は、`STATE.md` に `MAP_DONE` があり、ブログのテーマがその地域やお店探しに関わるときだけ足す**（足す語の3割まで。地名は、ブログの記事や `SITE.md` に出てくる地域だけ）。`MAP_DONE` が無いブログでは足さない。
 
 **8-5. 中身の採点と書き直し（新記事のたび。8-3・8-4 のあと。90点になるまで・最大3周）**
 - 8-3 は言葉づかいの検査、ここは中身（検索した人に答えているか・事実の確かさ・同じ形のくり返し・見出し）。**採点は自分でしない。** 書いた・直した本人が採点すると甘くなる（実測：自己採点95点の下書きが、別の目では56点だった）。`strict_score.py` が、まっさらな別の Claude に採点表（`style/ichigyo_厳しめ採点表.md`）と本文だけを渡して採点させる（追加料金なし）。
@@ -184,6 +186,23 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 - してはいけないこと：作り話・確かめていない数字を足す／「〇年〇月時点の情報です」のような注記を足す／文字数を増やすためだけの文を足す／**見出しの数と順序・画像・表を変える**（箇条書きを段落に直す所のほかは、ブロックの印 `<!-- wp:… -->` も変えない）／本体がわざと入れている書き方（考えが変わった経緯・外した選択肢・脱線・名づけ・結論の言い切り・読者の場面の描写。それぞれ1回）を消す。ただし、それが「自分で体験した話」や「捨てた選択肢」「上位の記事」のような舞台裏の言葉になっていたら、形だけ直す
 - 記録：`generated/score_<ID>.md` に、周ごとの `STRICT_SCORE` と直した所を1行ずつ足す。**最後の行は、最後の点が90以上なら `SCORE_OK <その点>`、90未満なら `SCORE_NG <その点>`**（17-4 の自己採点の点ではなく、この点を書く）。
 - 3周で90点に届かなくても、下書きのまま進める（止めない）。お客さんへの報告に点数は書かない。届かなかったときだけ1行足す：「仕上げの点検で、直しきれない所が残りました（〈何が。例：料金が確かめられませんでした〉）。公開の前にご確認ください」。
+
+**8-6. 地域の記事（「〈地名〉 〈探すお店・施設〉」の語。地図の設定が済んだブログだけ）**
+- 見分け方：新記事の語を決めたら、本体を動かす前に `python3 $W/wp_auto/scripts/kw_type.py --local "<語>"`。`LOCAL=no` なら、いつもどおり本体で作る。`LOCAL=yes AREA=〈地名〉 WHAT=〈探すもの〉` のとき：
+  - `STATE.md` に `MAP_DONE` が無い、または `cd $W/wp_auto && python3 scripts/places_fetch.py test` の1行目が `PLACES_OK` でない → **いつもどおり本体で作る（止めない）。** できた下書きに、実在のお店の名前・星の数・口コミの件数が出ていたら（確かめていないので）、8-4 の数字の確かめと同じやり方で、その文を選び方の話に言い直すか外す。
+  - `MAP_DONE` があり `PLACES_OK` → 下の手順で、**担当の Claude が `記事.md` を書く**（本体は動かさない。本体は Google マップのお店の情報を持っていないため）。
+- 手順（`cd $W/wp_auto`。`D=generated/local_<日付>_<時刻>`）：
+  1. お店を調べる：`python3 scripts/places_fetch.py search "<AREA> <WHAT>" --out $D/places.json --max 8` → `PLACES_SAVED <数>`。`PLACES_EMPTY`・`PLACES_NG` のときは、本体で作る道へ（上と同じ）。
+  2. `python3 scripts/places_fetch.py show $D/places.json` で一覧を見て、探すものに合うお店だけを選ぶ（3〜8つ）。**合うお店が3つ未満なら、地域の記事にしない**（本体で作る道へ）。
+  3. 公式サイトで確かめる：`python3 scripts/fact_fetch.py --keyword "<語>" --places $D/places.json --out $D/facts.md`（5〜12分。0章のとおり、外のページは鍵を渡されない別の Claude が読む）。`FACTS_NONE`・`FACTS_NG` でも止めない（そのお店の説明は、場所と種類だけになる）。
+  4. `prompts/local_article.md` を読み、そのとおりに `$D/記事.md` を書く。**お店の事実は `places.json` と `facts.md` にあるものだけ。星の数・口コミ・順位・感想は書かない**（星と口コミは、地図の中に Google マップが最新のものを出す）。
+  5. 検査：`python3 scripts/local_check.py $D/記事.md --facts $D/facts.md` が `LOCAL_CHECK OK` になるまで直す（最大3回。だめなら投稿せず、その語は使わないで報告に1行）。続けて `python3 scripts/md_to_wp.py $D/記事.md > $D/draft.html` → `python3 scripts/content_check.py $D/draft.html --type LIST --keyword "<語>"` と `python3 scripts/style_check.py $D/draft.html`。FAIL は `記事.md` の文を直してやり直す（最大2周）。
+  6. 画像：`python3 scripts/make_images_wp.py /home/user/ichigyo/tool config_ANIME.json $D/記事.md $D/img --no-manga --catch "<14字以内>"`（お店の小見出しには絵を作らない。地図が入る）。`ichigyo_AI_SETUP.md` の画像の確かめ（拡大して見る）も通す。画像に地図・お店の外観・看板の文字を描かせない。
+  7. 投稿：`python3 scripts/wp_post.py publish $D/記事.md $D/img --status draft`（**下書き**。地図用の鍵は、このときだけ本文に入る。保存するファイルには入れない）。`ERROR` が出たら投稿されていないので、そのまま報告する。
+  8. 8-5 の採点を通す（`strict_score.py $D/draft.html … --type LIST --label "地域のお店"`）。直すのは `記事.md` の文 → 5 の検査 → `wp_post.py publish $D/記事.md $D/img --update-id <ID>`。**最大2周。** 足してよい事実は `facts.md` だけ。お店の小見出しが短いこと・お店ごとの感想が無いことは、欠点ではない（直さない）。
+  9. 記録：`post_log.csv` のメモに `型=地域のお店 お店=<数>`。報告に1行：「今回は『地域のお店』の形で書きました。お店ごとに Google マップの地図が入っています」。
+- 地図の設定（鍵2つ）は後付け。お客さんが「お店の地図を入れたい」「地域の記事も書きたい」と送ったら、`/tmp/kit/SETUP_MAP.md`（R章の0で取った最新）のとおりに進める。こちらからはすすめない。
+- 鍵・お店の id・`places.json` の中身を、お客さんへの文に書かない。
 
 - 試し運転（`--dry-run`、7〜15分。終わるまで待ってから返事）→ テスト記事を1本 **下書き**。お客さんへ：「試しの記事を1本、下書きに入れました。ブログの管理画面の『投稿』→『下書き』で見られます。良ければ、ご自身で『公開』を押してください」
 `DONE 8` → push。
