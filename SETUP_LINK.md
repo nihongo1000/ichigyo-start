@@ -93,10 +93,10 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 ## 4. 通信の設定を作る（お客さんは許可のボタンだけ）
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `create_environment`：名前は「ichigyo 〈ドメイン〉」（例：ichigyo example.com。`https://`・`www.`・最後の / は付けない。ブログが複数になっても見分けられるように。同じ名前が使われていれば、そのブログの続きなので6章のリンクから再開する）。以下この名前を〈環境の名前〉と書く、scope personal、`switch_session` は none。
-   - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`、`suggestqueries.google.com`（ichigyo 本体がキーワードの候補を見るため）、`searchconsole.googleapis.com`・`oauth2.googleapis.com`（あとでサーチコンソールをつないだとき、お客さんに通信先を足してもらわずに済むよう、最初から入れておく）
-   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。お客さん自身の開始リンクにすでに入っている文字なので、許可の枠に出ても問題ない。チャットの文には書かない）、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
+   - 通信先：ブログのドメイン（`www.` 付きで動いているなら両方）、`api.meta.ai`、`suggestqueries.google.com`（ichigyo 本体がキーワードの候補を見るため）、`searchconsole.googleapis.com`・`oauth2.googleapis.com`（あとでサーチコンソールをつないだとき、お客さんに通信先を足してもらわずに済むよう、最初から入れておく）、`places.googleapis.com`・`www.google.com`・`www.googleapis.com`・`maps.googleapis.com`（あとで地図を入れるとき＝`SETUP_MAP.md` 用。同じ理由で最初から入れておく）
+   - 設定：`WP_SITE`（https://〜、最後の / なし）、`WP_USER`、`ICHIGYO_PASS`（合言葉。**必ずこの枠で入れる。お客さんに打ち込ませない**。お客さん自身の開始リンクにすでに入っている文字なので、許可の枠に出ても問題ない。チャットの文には書かない。**値は、最初の文の『合言葉:』のすぐ後ろの1語だけ**。その後ろに続く文、`claude/…` の枝の名前、URL は合言葉ではない）、`WP_APP_PASSWORD`（空）、`MUSE_API_KEY`（空）、`PLACES_API_KEY`（空）、`MAPS_EMBED_KEY`（空）（地図の鍵の2つは、あとで `SETUP_MAP.md` で貼ってもらう欄。先に空で作っておくと、お客さんは『〇〇=』の右に貼るだけで済む）。空を断られたら鍵の2つは作らず、5章の文に「いちばん下の行の最後で Enter を押し、WP_APP_PASSWORD= と打ってから」を足す
    - repositories：このリポジトリ `nihongo1000/ichigyo-start`（公開。お客さんの置き場所は作らない）
-- 5章の文に、ICHIGYO_PASS を打ち込ませる手順を足さない（打ちまちがいで7章が止まるため）。6章の続きのリンクの文の最後には、いつも `合言葉: 〈合言葉〉` を付ける（この枠で入らなかったときや、環境の設定が消えたときに、7章で `update_environment` で入れ直すため）。
+- 5章の文に、ICHIGYO_PASS を打ち込ませる手順を足さない（打ちまちがいで7章が止まるため）。6章の続きのリンクの文の最後には、いつも `合言葉: 〈合言葉〉` を付ける（最初の文に `ICHIGYO_KIT_BRANCH` のテスト用の指定があれば、それも同じ文のまま `合言葉:` の前に付ける）（この枠で入らなかったときや、環境の設定が消えたときに、7章で `update_environment` で入れ直すため）。
 3. 断られたら、もう一度は聞かない。お客さんへ「先ほどの枠で、ボタンを押してください」とだけ書く。
 `DONE 4`。
 

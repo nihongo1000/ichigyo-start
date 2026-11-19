@@ -16,6 +16,7 @@
 - `STATE.md` に `MAP_DONE` があれば、もう済んでいる。4章の確かめだけして終わる。
 
 ## 1. 鍵の置き場所を作る（お客さんは許可のボタンだけ）
+- 環境の設定に `PLACES_API_KEY` と `MAPS_EMBED_KEY` の名前がもうあり（`env | cut -d= -f1` で名前だけ見る）、`curl -s -o /dev/null -m 15 -w '%{http_code}' https://places.googleapis.com/` が `000`・`403` でなければ、この章は飛ばして2章へ（新しい `SETUP_LINK.md` の4章で最初から作ってある）。
 1. 予告：「このあと『許可』の枠が出ます。中のボタン（『許可』『Approve』など）を押してください」
 2. `update_environment`（〈環境の名前〉）で：
    - 設定：`PLACES_API_KEY`（空）と `MAPS_EMBED_KEY`（空）を足す。**ほかの設定は消さない・変えない**
