@@ -199,7 +199,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
   3. 公式サイトで確かめる：`python3 scripts/fact_fetch.py --keyword "<語>" --places $D/places.json --out $D/facts.md`（5〜12分。0章のとおり、外のページは鍵を渡されない別の Claude が読む）。`FACTS_NONE`・`FACTS_NG` でも止めない（そのお店の説明は、場所と種類だけになる）。
   4. `prompts/local_article.md` を読み、そのとおりに `$D/記事.md` を書く。**お店の事実は `places.json` と `facts.md` にあるものだけ。星の数・口コミ・順位・感想は書かない**（星と口コミは、地図の中に Google マップが最新のものを出す）。
   5. 検査：`python3 scripts/local_check.py $D/記事.md --facts $D/facts.md` が `LOCAL_CHECK OK` になるまで直す（最大3回。だめなら投稿せず、その語は使わないで報告に1行）。続けて `python3 scripts/md_to_wp.py $D/記事.md > $D/draft.html` → `python3 scripts/content_check.py $D/draft.html --type LIST --keyword "<語>"` と `python3 scripts/style_check.py $D/draft.html`。FAIL は `記事.md` の文を直してやり直す（最大2周）。
-  6. 画像：`python3 scripts/make_images_wp.py /home/user/ichigyo/tool config_ANIME.json $D/記事.md $D/img --no-manga --catch "<14字以内>"`（お店の小見出しには絵を作らない。地図が入る）。`ichigyo_AI_SETUP.md` の画像の確かめ（拡大して見る）も通す。画像に地図・お店の外観・看板の文字を描かせない。
+  6. 画像：`python3 scripts/make_images_wp.py /home/user/ichigyo/tool config_ANIME.json $D/記事.md $D/img --no-manga --catch "<14字以内>" --age "<SITE.md の読者の年代>"`（お店の小見出しには絵を作らない。地図が入る）。`ichigyo_AI_SETUP.md` の画像の確かめ（拡大して見る）も通す。画像に地図・お店の外観・看板の文字を描かせない。
   7. 投稿：`python3 scripts/wp_post.py publish $D/記事.md $D/img --status draft`（**下書き**。地図用の鍵は、このときだけ本文に入る。保存するファイルには入れない）。`ERROR` が出たら投稿されていないので、そのまま報告する。
   8. 8-5 の採点を通す（`strict_score.py $D/draft.html … --type LIST --label "地域のお店"`）。直すのは `記事.md` の文 → 5 の検査 → `wp_post.py publish $D/記事.md $D/img --update-id <ID>`。**最大2周。** 足してよい事実は `facts.md` だけ。お店の小見出しが短いこと・お店ごとの感想が無いことは、欠点ではない（直さない）。
   9. 記録：`post_log.csv` のメモに `型=地域のお店 お店=<数>`。報告に1行：「今回は『地域のお店』の形で書きました。お店ごとに Google マップの地図が入っています」。
