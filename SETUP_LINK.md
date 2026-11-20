@@ -225,6 +225,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
   1. 上位の記事を読む：`cd $W/wp_auto && python3 scripts/fact_fetch.py --keyword "<語>" --rivals generated/rivals_<日付>.txt --out generated/rivals_<日付>.md` → `python3 scripts/gap_check.py generated/rivals_<日付>.md --region "<AREA>"` の `TOPIC`（上位がよく扱う話題）。
   2. その地域の公式の催し・サークル・窓口を拾う：`python3 scripts/fact_fetch.py --keyword "<語>" --label "地域の出会い" --out facts/facts_<ID>.md`（自治体・社会福祉協議会・公民館・生涯学習センター・結婚支援センターなどのページから、名前・場所・対象・費用・申し込み方）。8-4 の型ごとのメモとは別に、型が何でも作る。
 - 本体の下書きができたら、8-5 の書き直しで：`python3 scripts/gap_check.py generated/rivals_<日付>.md --article <下書きの本文を保存した .md か .html> --region "<AREA>"` の `GAP` を見て、メモの事実で答えられる話題を足す。**「〈AREA〉で参加できる公式の催し・サークル・相談の窓口」の大見出しを1つ足し、メモにあるものだけを、名前・場所・対象・費用・申し込み方の表か箇条書きで並べる**（メモに3つ未満なら、大見出しにせず、合う段落に1〜2文で足す）。終わった催しは書かない。名前・日付・費用は作らない。
+- 表に入れるのは、キーワードの年代の人が今使えるものを中心にする。対象の年齢が合わないもの（50代の語で「60歳以上」など）は、表に並べず、表のあとの文で1〜2文にまとめる。
 - 報告に1行：「その地域の公式の催し・窓口を〈数〉件足しました」（0件ならそう書く）。
 
 - 地図の設定（鍵2つ）は後付け。お客さんが「お店の地図を入れたい」「地域の記事も書きたい」と送ったら、`/tmp/kit/SETUP_MAP.md`（R章の0で取った最新）のとおりに進める。こちらからはすすめない。
