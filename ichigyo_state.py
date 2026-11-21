@@ -10,7 +10,7 @@
 鍵は環境の設定から読む: WP_SITE（無ければ WP_URL）, WP_USER, WP_APP_PASSWORD。
 鍵の値は表示しない。しまう前に、鍵の値が記録に混じっていないか確かめる。
 """
-import base64, hashlib, io, json, os, sys, tarfile, urllib.error, urllib.parse, urllib.request
+import base64, hashlib, io, json, os, re, sys, tarfile, urllib.error, urllib.parse, urllib.request
 
 SLUG = "ichigyo-state"
 TITLE = "ichigyo の記録（消さないでください・非公開）"
@@ -21,6 +21,9 @@ MAX_FILE = 300_000
 # キットの写し（毎回 R章で置き直す）はしまわない。ブログに部品の中身を置かないため
 SKIP_PATHS = {"ichigyo/ichigyo_AI_SETUP.md", "ichigyo/SETUP_LINK.md"}
 SKIP_PREFIX = ("tools/rewrite/",)
+# キットの持ち物（採点表・文章の決まり・記事の型のひな形）。毎回 R章で最新を置くので、しまわない。
+# 前にしまった古い版が記録に残っていても、取り出すときに最新の部品を上書きしない
+KIT_OWNED = ("wp_auto/style/ichigyo_", "wp_auto/prompts/article_types/", "wp_auto/prompts/local_article.md")
 MAX_TOTAL = 4_000_000
 SECRET_VARS = ("WP_APP_PASSWORD", "MUSE_API_KEY", "GSC_SA_JSON", "ICHIGYO_PASS", "RAKKO_API_KEY")
 
@@ -30,18 +33,32 @@ def die(msg):
     sys.exit(1)
 
 
+# 環境の設定の見本（「ここに〇〇を貼る」）。見本だけなら空と同じ、見本の後ろに貼ってあれば知らせる
+PASTE_VARS = ("WP_APP_PASSWORD", "MUSE_API_KEY", "PLACES_API_KEY", "MAPS_EMBED_KEY")
+HINT = re.compile(r"ここに.*?を?貼る")
+
+
+def env(v):
+    val = os.environ.get(v, "").strip()
+    if HINT.search(val) or "ここに" in val:
+        if HINT.sub("", val).replace("ここに", "").strip():
+            die(f"ENV_LEFTOVER {v}")
+        return ""
+    return val
+
+
 def site():
     s = (os.environ.get("WP_SITE") or os.environ.get("WP_URL") or "").strip().rstrip("/")
     if not s:
         die("ENV_MISSING WP_SITE")
     for v in ("WP_USER", "WP_APP_PASSWORD"):
-        if not os.environ.get(v, "").strip():
+        if not env(v):
             die(f"ENV_MISSING {v}")
     return s
 
 
 def auth():
-    raw = f"{os.environ['WP_USER'].strip()}:{os.environ['WP_APP_PASSWORD'].strip()}"
+    raw = f"{os.environ['WP_USER'].strip()}:{env('WP_APP_PASSWORD')}"
     return "Basic " + base64.b64encode(raw.encode()).decode()
 
 
@@ -89,7 +106,7 @@ def pack(work):
             for f in sorted(files):
                 p = os.path.join(root, f)
                 rel = os.path.relpath(p, work).replace(os.sep, "/")
-                if rel in SKIP_PATHS or rel.startswith(SKIP_PREFIX):
+                if rel in SKIP_PATHS or rel.startswith(SKIP_PREFIX) or rel.startswith(KIT_OWNED):
                     continue
                 if not f.endswith(KEEP_EXT) or os.path.getsize(p) > MAX_FILE:
                     continue
@@ -103,6 +120,8 @@ def pack(work):
         text = b"".join(tar.extractfile(m).read() for m in tar.getmembers() if m.isfile())
     for v in SECRET_VARS:
         val = os.environ.get(v, "").strip()
+        if "ここに" in val:
+            continue
         if len(val) >= 8 and (val.encode() in text or val.replace(" ", "").encode() in text):
             die(f"FAIL secret_in_state {v}")
     return blob
@@ -147,6 +166,8 @@ def pull(work):
         for m in tar.getmembers():
             if not m.isfile() or m.name.startswith(("/", "..")) or "/../" in m.name:
                 continue
+            if m.name.replace("\\", "/").lstrip("./").startswith(KIT_OWNED):
+                continue
             if hasattr(tarfile, "data_filter"):
                 tar.extract(m, work, filter="data")
             else:
@@ -166,6 +187,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("pull", "push", "check"):
         die(__doc__)
     if sys.argv[1] == "check":
+        for v in PASTE_VARS:
+            env(v)
         check()
     elif len(sys.argv) < 3:
         die(__doc__)
