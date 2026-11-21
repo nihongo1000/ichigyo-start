@@ -153,7 +153,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 - **ブログの見た目の型（WordPress のテーマ）を確かめる（聞かずに）**：`python3 -I $R/cocoon_convert.py theme <ブログのアドレス>`。`THEME cocoon` なら `SITE.md` に `WPテーマ: Cocoon`、`THEME swell` なら `WPテーマ: SWELL`。`unknown` のときは、REST で公開記事を数本（`context=edit`）見て、`wp:cocoon-blocks/` があれば Cocoon、`wp:loos/` があれば SWELL。どちらも無い（ほかのテーマ・記事0本）なら `WPテーマ: SWELL`（本体の標準）にして、報告に1行。お客さんには聞かない・見せない。`WPテーマ` の行が無い `SITE.md`（前の版で設定したブログ）は、次の新記事の前にこれを先にやる。
 - キーワードの在庫を20個（既存記事と同じ意味の語は除く）。**同じ型の語ばかりにならないように選ぶ（8-4）。**
 - **記事がまだ無いブログ**（0〜2本）：まねる見本が無いので、聞かずに標準で決める。画風は ichigyo 本体の初期設定（やわらかいアニメ調）、人物はテーマの読者に近い大人1人、アイキャッチは本体の標準の形、カテゴリはテーマから3〜5個を作る案だけ出して既定の『未分類』に入れる（カテゴリの作成はしない）。文体は「です・ます」でやさしく。
-- **参考リンク欄は付けない**：`config_ANIME.json` の `evidence.max_per_article` を 0 にする（クラウドの検索では本物の URL が本体に渡らず、`claude_search_result_1` のような偽のリンクになるため）。投稿の前に必ず `grep -c 'claude_search_result' <本文HTML>` が 0 か確かめ、1以上なら投稿しないでその欄を消してから出す。
+- **参考リンク欄は、本体の設定のまま**（調査が本物の URL を受け取るようになったので、もとの版と同じに戻した。`config_ANIME.json` の `evidence` は変えない）。にせのリンクが入った囲みだけは、8-3 の `strip_evidence.py` が消す。
 - 試し運転の前に決める：情報記事の書き方（作り話の体験を書かない）／画像に地図と英語の文字を入れない／人物を1人に固定／アイキャッチは既存記事の形に合わせる／カテゴリは既存に対応／実在しない参考リンクを入れない。
 - **読者に未成年が多いジャンル**なら最初にガードを決め、記事の指示の冒頭に「他のすべてに優先」として書く（恋愛・出会いを出さない、容姿を評価しない、学生服に見える服にしない など）。お金・健康・法律なら断定しない・根拠のない数字を書かない。
 **8-2. ブログの話し方を作る（聞かずに・記事が5本以上あるとき）**
@@ -164,7 +164,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 - 終わったら（作らなかったときも）`STATE.md` に `STYLE_DONE <日付>`。**`DONE 8` があるのに `STYLE_DONE` が無いブログ（前の版で設定したブログ）は、次の新記事の前にこの 8-2 を先にやる。**
 
 **8-3. 日本語の仕上げ（新記事のたびに）**
-- 下書きができたら、本文（`context=edit` の raw）を `$W/wp_auto/generated/draft_<ID>.html` に保存し、まず `python3 $W/wp_auto/scripts/strip_evidence.py <そのファイル>` で参考リンクの囲みを消す（本体の設定を0にしても入るため。`REMOVED 1` 以上なら、ほかに直す所が無くても最後に REST で下書きを更新する）。そのあと `python3 $W/wp_auto/scripts/style_check.py <そのファイル>` を通す。
+- 下書きができたら、本文（`context=edit` の raw）を `$W/wp_auto/generated/draft_<ID>.html` に保存し、まず `python3 $W/wp_auto/scripts/strip_evidence.py <そのファイル>` で、にせのリンク（`claude_search_result`）が入った参考リンクの囲みだけを消す（本物のリンクの囲みは残す。`REMOVED 1` 以上なら、ほかに直す所が無くても最後に REST で下書きを更新する。`REMOVED 0` がふつう）。そのあと `python3 $W/wp_auto/scripts/style_check.py <そのファイル>` を通す。
 - **`SITE.md` が `WPテーマ: Cocoon` のときだけ**、style_check の前に `python3 -I $R/cocoon_convert.py convert <そのファイル>` で飾り（囲み・手順・よくある質問・表・マーカー）を Cocoon の形に置きかえる（本体は SWELL の形でしか書かないため）。`CONVERTED 1` 以上なら、ほかに直す所が無くても最後に REST で下書きを更新する。`LEFT` が1以上なら、残った種類を報告に1行（下書きのまま。お客さんには見せない）。`BROKEN` が出たら置きかえずに元のまま出し、報告に1行。
 - FAIL があれば、`$W/wp_auto/style/ichigyo_日本語ルール.md` の2〜3章で**段落の文だけ**を言い直して、REST で下書きを更新する（ブロックの印 `<!-- wp:… -->`・画像・表・囲み・見出しの数は変えない。文の意味と事実を変えない）。もう一度チェック。**最大2周**。
 - **文字が詰まっている FAIL（3文以上の段落・180字をこえる段落・120字をこえる段落が多い・5つ以上を並べた文・110字をこえる文）は、言い直しではなく形で直す**：長い段落は、意味の切れ目で2〜3の段落に分ける（段落のブロックを足してよい）。地名・料金の種類・条件などの並びは、箇条書きのブロックにする（前に1文、あとに1文までを置く）。文の意味と事実は変えない。
