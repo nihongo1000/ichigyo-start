@@ -228,11 +228,11 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 **8-6c. 地名の無いランキングの語（`kw_type.py --local` が `LOCAL=no FORM=RANK2D`。例：「マッチングアプリ おすすめ」「格安SIM ランキング」「ペット保険 比較」）**
 - もとのランキングツールと同じく、全国のサービス・商品の比較として書く。上位の記事から候補を拾い、候補ごとに公式サイトを調べて表にする。**Google マップは使わない（地図の設定が無いブログでも使える）。担当の Claude が `記事.md` を書く**（本体は動かさない）。
 - 手順（`cd $W/wp_auto`。`D=generated/rank_<日付>_<時刻>`）：
-  1. 調べる：`python3 scripts/rank_research.py collect "<語>" --out $D --count 10 | tee $D/rank_research.log`（20〜40分。もとのランキングツールのプログラムそのものが、上位5サイトを読み、候補を多くて10拾い、候補ごとに公式サイトと料金のページを開いて事実を取る。鍵は使わない）。最後の行が `RANK_RESEARCH OK …` なら次へ。`RANK_RESEARCH NG` は1回だけやり直し、だめなら**いつもどおり本体で作る**（止めない）。
+  1. 調べる：`python3 scripts/rank_research.py collect "<語>" --out $D --count 10 | tee $D/rank_research.log`（検索の鍵があるブログで3〜5分、無いブログで6〜15分。もとのランキングツールのプログラムそのものが、上位5サイトを読み、候補を多くて10拾い、候補ごとに公式サイトと料金のページを開いて事実を取る。鍵は使わない）。最後の行が `RANK_RESEARCH OK …` なら次へ。`RANK_RESEARCH NG` は1回だけやり直し、だめなら**いつもどおり本体で作る**（止めない）。
   2. 順位と表：`python3 scripts/rank_national.py table $D/rank_pack` → `RANK_OK <数>`（公式サイトで確かめられた候補だけ。多くて10）。`RANK_FEW`（3つ未満）なら、いつもどおり本体で作る。
   3. 書く：`prompts/rank_article.md` を読み、そこにある「書く前に読むもの」を全部読んでから、`$D/記事.md` を書く。文体は 8-2 の `speech_custom.txt`。
   4. 検査：`python3 scripts/rank_national.py check $D/記事.md --pack $D/rank_pack` が `RANK_CHECK OK` になるまで直す（最大3回。だめなら投稿せず、その語は使わないで報告に1行）→ `python3 scripts/md_to_wp.py $D/記事.md > $D/draft.html` → `python3 scripts/rank_research.py audit $D/draft.html --keyword "<語>" --pack $D/rank_pack --count <載せた候補の数>`（`RANK_AUDIT CRITICAL` は 8-6 の5と同じ扱い）→ `python3 scripts/content_check.py $D/draft.html --type RANKING --keyword "<語>"` と `python3 scripts/style_check.py $D/draft.html`（FAIL は 8-3 と同じ直し方）。
-  5. 画像：`python3 scripts/make_images_wp.py /home/user/ichigyo/tool config_ANIME.json $D/記事.md $D/img --no-manga --catch "<14字以内>" --age "<SITE.md の読者の年代>"`（決まりは 8-6 の6と同じ）。
+  5. 画像：`python3 scripts/make_images_wp.py /home/user/ichigyo/tool config_ANIME.json $D/記事.md $D/img --no-manga --catch "<14字以内>" --age "<SITE.md の読者の年代>" --local --max 5`（`--local` を付けると、大見出しの絵は文字の無い写真になり、小見出しの絵は作らない。料金や数字を絵に描かせないため。大見出しの絵は多くて5枚。決まりは 8-6 の6と同じ）。
   6. 投稿：`python3 scripts/wp_post.py publish $D/記事.md $D/img --status draft`（**下書き**）。
   7. 8-5 の採点を通す（`strict_score.py $D/draft.html … --type RANKING --label "ランキング" --facts $D/rank_pack/公式データ.md`）。直すのは `記事.md` の文 → 4 の検査 → `wp_post.py publish $D/記事.md $D/img --update-id <ID>`。**最大2周。** 足してよい事実は `rank_pack/公式データ.md` だけ。
   8. 記録：`post_log.csv` のメモに `型=ランキング 候補=<数>`。報告に1行：「今回は『ランキング』の形で書きました。公式サイトで確かめられた〈数〉件を比べています」。金融の語（クレジットカードなど）のときは「お金に関わる記事なので、公開の前に必ず中身をご確認ください」と1行足す。
