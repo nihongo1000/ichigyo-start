@@ -23,7 +23,8 @@ SKIP_PATHS = {"ichigyo/ichigyo_AI_SETUP.md", "ichigyo/SETUP_LINK.md"}
 SKIP_PREFIX = ("tools/rewrite/",)
 # キットの持ち物（採点表・文章の決まり・記事の型のひな形）。毎回 R章で最新を置くので、しまわない。
 # 前にしまった古い版が記録に残っていても、取り出すときに最新の部品を上書きしない
-KIT_OWNED = ("wp_auto/style/ichigyo_", "wp_auto/prompts/article_types/", "wp_auto/prompts/local_article.md")
+KIT_OWNED = ("wp_auto/style/ichigyo_", "wp_auto/prompts/article_types/", "wp_auto/prompts/local_article.md",
+             "wp_auto/prompts/rank_article.md", "wp_auto/ranking_tool/")
 MAX_TOTAL = 4_000_000
 SECRET_VARS = ("WP_APP_PASSWORD", "MUSE_API_KEY", "GSC_SA_JSON", "ICHIGYO_PASS", "RAKKO_API_KEY")
 
