@@ -1,9 +1,9 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-19 v7.9（この行が無い古いファイルは使わない）
+版: 2026-11-21 v7.10（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
-最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py` だけがある。
+最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py`・Cocoon 用の置きかえの道具 `cocoon_convert.py` などがある。
 **このリポジトリが画面につながっていないことがある**（リンクの指定が効かず、お客さんの別のリポジトリだけがつながっている、など）。そのときもお客さんに何も聞かず、R章の0が公開リポジトリから直接取るので、そのまま進める。お客さんの別のリポジトリ（ichigyo-start 以外）は、読まない・変えない・使わない。
 お客さんのパソコンは使わない。お客さんにファイルを扱わせない。**お客さん用の GitHub の置き場所は作らない（頼まない）。** 記録はお客さんの WordPress の非公開ページ1枚にしまう（`ichigyo_state.py`）。
 
@@ -49,7 +49,7 @@ R章の手順を、合言葉を最初の文から取って実行する（`ICHIGY
 ## R. 毎回の準備（1章・7章・定期実行のすべての最初）
 ```bash
 # 0. 最新の手順書と部品を、公開リポジトリから直接 /tmp/kit に取る（画面につながっているリポジトリは使わない・動かさない）
-R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md SETUP_MAP.md ichigyo_state.py ichigyo_set.enc sc_login.py sc_client.enc'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
+R=/tmp/kit && rm -rf $R /tmp/kitrepo && mkdir -p $R; F='SETUP_LINK.md SETUP_SC.md SETUP_MAP.md ichigyo_state.py ichigyo_set.enc sc_login.py sc_client.enc cocoon_convert.py'; if git clone -q --depth 1 -b "${ICHIGYO_KIT_BRANCH:-main}" https://github.com/nihongo1000/ichigyo-start.git /tmp/kitrepo && (cd /tmp/kitrepo && cp $F $R/); then echo KIT_LATEST; else L=$(dirname "$(ls /home/user/ichigyo-start/ichigyo_set.enc /home/user/*/ichigyo_set.enc 2>/dev/null | head -1)"); (cd "$L" && cp $F $R/) && echo KIT_NOT_UPDATED; fi; ls $R
 PY=$(command -v /usr/local/bin/python3.13 || command -v python3.13 || command -v python3); $PY -m pip install -q google-auth requests pillow google-generativeai
 rm -rf /tmp/set && mkdir -p /tmp/set
 # 1. 合言葉：2回目からは環境の ICHIGYO_PASS。環境に無いとき（初回など）、または下の openssl が環境の値で失敗したとき（欄に見本や別の文字が入っている）は export ICHIGYO_PASS='<最初の文の合言葉>'（表示しない）でもう一度。それで開けたら、7章の update_environment で環境の欄もその値に直す（お客さんは許可のボタンだけ）
@@ -150,6 +150,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 
 ## 8. ブログに合わせる → 試し記事（`ichigyo_AI_SETUP.md` 5章 S1・13章 S9）
 - `wp_auto/SITE.md`・`wp_auto/config.json` を3章の答えとブログの中身から作る。テーマ・ジャンル・読者・カテゴリはブログを見て自分で決める。サーチコンソールがまだなら `SITE.md` に `SC: なし`。
+- **ブログの見た目の型（WordPress のテーマ）を確かめる（聞かずに）**：`python3 -I $R/cocoon_convert.py theme <ブログのアドレス>`。`THEME cocoon` なら `SITE.md` に `WPテーマ: Cocoon`、`THEME swell` なら `WPテーマ: SWELL`。`unknown` のときは、REST で公開記事を数本（`context=edit`）見て、`wp:cocoon-blocks/` があれば Cocoon、`wp:loos/` があれば SWELL。どちらも無い（ほかのテーマ・記事0本）なら `WPテーマ: SWELL`（本体の標準）にして、報告に1行。お客さんには聞かない・見せない。`WPテーマ` の行が無い `SITE.md`（前の版で設定したブログ）は、次の新記事の前にこれを先にやる。
 - キーワードの在庫を20個（既存記事と同じ意味の語は除く）。**同じ型の語ばかりにならないように選ぶ（8-4）。**
 - **記事がまだ無いブログ**（0〜2本）：まねる見本が無いので、聞かずに標準で決める。画風は ichigyo 本体の初期設定（やわらかいアニメ調）、人物はテーマの読者に近い大人1人、アイキャッチは本体の標準の形、カテゴリはテーマから3〜5個を作る案だけ出して既定の『未分類』に入れる（カテゴリの作成はしない）。文体は「です・ます」でやさしく。
 - **参考リンク欄は付けない**：`config_ANIME.json` の `evidence.max_per_article` を 0 にする（クラウドの検索では本物の URL が本体に渡らず、`claude_search_result_1` のような偽のリンクになるため）。投稿の前に必ず `grep -c 'claude_search_result' <本文HTML>` が 0 か確かめ、1以上なら投稿しないでその欄を消してから出す。
@@ -164,6 +165,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 
 **8-3. 日本語の仕上げ（新記事のたびに）**
 - 下書きができたら、本文（`context=edit` の raw）を `$W/wp_auto/generated/draft_<ID>.html` に保存し、まず `python3 $W/wp_auto/scripts/strip_evidence.py <そのファイル>` で参考リンクの囲みを消す（本体の設定を0にしても入るため。`REMOVED 1` 以上なら、ほかに直す所が無くても最後に REST で下書きを更新する）。そのあと `python3 $W/wp_auto/scripts/style_check.py <そのファイル>` を通す。
+- **`SITE.md` が `WPテーマ: Cocoon` のときだけ**、style_check の前に `python3 -I $R/cocoon_convert.py convert <そのファイル>` で飾り（囲み・手順・よくある質問・表・マーカー）を Cocoon の形に置きかえる（本体は SWELL の形でしか書かないため）。`CONVERTED 1` 以上なら、ほかに直す所が無くても最後に REST で下書きを更新する。`LEFT` が1以上なら、残った種類を報告に1行（下書きのまま。お客さんには見せない）。`BROKEN` が出たら置きかえずに元のまま出し、報告に1行。
 - FAIL があれば、`$W/wp_auto/style/ichigyo_日本語ルール.md` の2〜3章で**段落の文だけ**を言い直して、REST で下書きを更新する（ブロックの印 `<!-- wp:… -->`・画像・表・囲み・見出しの数は変えない。文の意味と事実を変えない）。もう一度チェック。**最大2周**。
 - **文字が詰まっている FAIL（3文以上の段落・180字をこえる段落・120字をこえる段落が多い・5つ以上を並べた文・110字をこえる文）は、言い直しではなく形で直す**：長い段落は、意味の切れ目で2〜3の段落に分ける（段落のブロックを足してよい）。地名・料金の種類・条件などの並びは、箇条書きのブロックにする（前に1文、あとに1文までを置く）。文の意味と事実は変えない。
 - 最後に 3-2 の AI臭さチェック表と 3-3 の100点表で自己採点し、`generated/score_<ID>.md` に書く。届かなくても下書きのまま、届かなかった点を報告に1行。
@@ -248,6 +250,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
   2. ラッコが無い、または候補が0件なら、公開から90日以上たった記事のうち、更新が古い順に1本。
   3. 下書き・非公開・固定ページ・`skip_urls.txt` の記事は選ばない。
   - 中身は 15-3 のとおり（足りない見出しの追記・古い情報の更新）。**承認期間（15-0）のあいだは反映せず、案と差分だけを報告**し、お客さんが「反映して」と送ったら直す。
+  - `WPテーマ: Cocoon` のブログは、リライトMD（SWELL 用）の飾りの部分は使わず、足すのは段落・見出し・表・リストを中心にする。反映の前に、直した本文に `cocoon_convert.py convert` をかけてから REST で更新する（SWELL の飾りを残さないため）。
   - サーチコンソールは上級者向けの後付け。お客さんから言われたときだけ案内し、こちらからはすすめない。お客さんが「サーチコンソールもつなぎたい」と送ったら、`/tmp/kit/SETUP_SC.md`（R章の0で取った最新）のとおりに進める。
 
 **9-1. 作る**
