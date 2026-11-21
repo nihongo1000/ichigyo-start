@@ -211,8 +211,7 @@ def conv_step(a, inner):
         t = re.search(r'class="[^"]*swell-block-step__title[^"]*"[^>]*>(.*?)</div>', it, re.S)
         title = t.group(1).strip() if t else ""
         body = outer_div_inner(it, "swell-block-step__body") or ""
-        title_attr = re.sub(r"<[^>]+>", "", title)
-        out.append(f"<!-- wp:cocoon-blocks/timeline-item{jattr({'title': htmlmod.unescape(title_attr)})} -->\n"
+        out.append(f"<!-- wp:cocoon-blocks/timeline-item{jattr({'label': f'STEP{n}', 'title': title})} -->\n"
                    f'<li class="wp-block-cocoon-blocks-timeline-item timeline-item cf"><div class="timeline-item-label">STEP{n}</div>'
                    f'<div class="timeline-item-content cf"><div class="timeline-item-title">{title}</div>'
                    f'<div class="timeline-item-snippet">{ensure_blocks(body)}</div></div></li>\n'
@@ -371,6 +370,17 @@ def convert(text, box_attr="boxStyle"):
     text, c = replace_all(text, "loos/cap-block", conv_capblock(box_attr)); total += c
     text, c = replace_all(text, "loos/step", conv_step); total += c
     text, c = replace_all(text, "loos/faq", conv_faq); total += c
+    # 上で扱っていない SWELL のブロック（ふきだし など）は、印を外して中身だけ残す（編集画面で「未対応のブロック」にしない）
+    for _ in range(50):
+        m = re.search(r"<!--\s*wp:(loos/[a-z0-9\-]+)", text)
+        if not m:
+            break
+        name = m.group(1)
+        if re.search(r"<!--\s*wp:" + re.escape(name) + r"(\s+\{.*?\})?\s*/-->", text):  # 中身の無い印（自動で出す型）はそのまま残して LEFT で知らせる
+            break
+        text, c = replace_all(text, name, lambda a, inner: ensure_blocks(inner)); total += c
+        if not c:
+            break
     text, c = clean_block_comments(text); total += c
     text, c = clean_inline(text); total += c
     return text, total
