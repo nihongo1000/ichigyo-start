@@ -252,6 +252,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
 
 **9-1. 作る**
 - 「新記事（9-0 の回数・朝6時台）」と「キーワード補充（日曜。新記事が毎日なら水曜と日曜）」、つながっていれば「リライト（9-0 の回数。新記事と違う曜日・時刻）」。**このセッションに向けて** `create_trigger` で作る。間は1時間以上、分は 00/30 を避ける。時刻はお客さんの国の朝。
+- **ブログが2つ以上のときは時刻をずらす**（同じ時刻に重なると、使用量の上限に当たったり、片方が動かなかったりするため）。作る前に `list_triggers`（enabled true・recurring true。続きがあれば cursor で最後まで）で、このアカウントの動いている定期実行の曜日と時刻を全部見る。これから作る予約は、**同じ曜日に動くどの予約とも1時間以上あける**。新記事は朝6時台から見て、ふさがっていれば7時台、8時台、9時台と1時間ずつ後ろへ送り、最初に空いた所にする（9時台までふさがっていれば、5時台）。キーワード補充とリライトも同じ決め方。止めてある予約（enabled false）は数えない。ほかの予約は動かさない・変えない。決めた時刻は `$W/ichigyo/STATE.md` に1行書く。
 - 指示文の最初に「GitHub の公開リポジトリ nihongo1000/ichigyo-start を使います。/home/user/ichigyo-start に無ければ、このセッションに追加するか git clone https://github.com/nihongo1000/ichigyo-start.git /home/user/ichigyo-start で取り、ほかのリポジトリには触れないでください。`/home/user/ichigyo-start/SETUP_LINK.md` の0章とR章を読み、R章を実行してから。`$W/ichigyo/ichigyo_AI_SETUP.md` の15〜17章に従い、新記事は 8-3 の日本語の仕上げも通す。最後に R章の『終わり』（commit → `ichigyo_state.py push`、`STATE_SAVED`）を必ず行う」。
 - 作ったら確かめる。ただし新記事は8章の試し記事で確かめ済みなので、新記事の予約は手動で動かさない（お客さんの下書きが1日に2本入らないように）。記録の取り出し（R章の5）と preflight だけ通ることを確かめる。キーワード補充の予約は1回だけ手動で動かしてよい。結果を `$W/ichigyo/STATE.md` に書いて push。
 - 鍵をあとで変えたら、6章の形のリンクで新しいセッションを開いてもらい、そこで定期実行を作り直す。
