@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-21 v7.10（この行が無い古いファイルは使わない）
+版: 2026-11-23 v7.12（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py`・Cocoon 用の置きかえの道具 `cocoon_convert.py` などがある。
