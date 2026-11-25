@@ -1,4 +1,125 @@
-<div class="sysd lpw-in">
+<div class="sysa">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+<style>
+.sysa *{box-sizing:border-box;margin:0;padding:0}
+.sysa .sysa-in{width:1600px;height:1330px;background:#f8f2ea;font-family:"Noto Serif JP","Noto Sans JP","IPAPGothic",serif;color:#16213a;position:relative;overflow:hidden;transform-origin:0 0;transform:scale(.5875);position:absolute;left:0;top:0;line-height:normal;text-align:left}
+.sysa .eyebrow{text-align:center;color:#a8843a;letter-spacing:.34em;font-size:20px;font-weight:700;padding-top:44px}
+.sysa .eyebrow:after{content:"";display:block;width:60px;height:2px;background:#b8924a;margin:14px auto 0}
+.sysa .h1{text-align:center;font-size:50px;font-weight:900;margin-top:26px;letter-spacing:.02em}
+.sysa .h1 em{font-style:normal;color:#a8843a}
+.sysa .sub{text-align:center;font-size:22px;margin-top:16px;color:#3a4358;font-weight:500}
+.sysa .card{position:absolute;background:#fffdf9;border:1px solid #e6dccb;border-radius:14px;box-shadow:0 6px 18px rgba(60,40,10,.07);text-align:center}
+.sysa .you{left:50px;top:300px;width:230px;height:190px;padding-top:26px}
+.sysa .cmd{left:50px;top:560px;width:230px;height:230px;padding-top:26px;background:#16213a;color:#fff;border-color:#16213a}
+.sysa .cmd .t{color:#e9c979}
+.sysa .t{font-size:26px;font-weight:900}
+.sysa .s{font-size:16px;line-height:1.6;margin-top:10px;font-weight:500;font-family:"Noto Sans JP","IPAPGothic",sans-serif}
+.sysa .lab{font-size:14px;letter-spacing:.2em;color:#a8843a;font-weight:700;font-family:"Noto Sans JP",sans-serif}
+.sysa .cmd .lab{color:#c9a961}
+.sysa .node{width:340px;height:250px;padding:20px 12px 0}
+.sysa .ic{width:74px;height:74px;border-radius:50%;background:#16213a;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+.sysa .ic svg{width:38px;height:38px;stroke:#e9c979;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sysa .node .t{font-size:25px;margin-top:2px}
+.sysa .chips{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.sysa .chips span{font-family:"Noto Sans JP","IPAPGothic",sans-serif;font-size:13.5px;font-weight:700;background:#f4ead8;color:#5b4a22;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.sysa .n1{left:360px;top:280px}
+.sysa .n2{left:770px;top:280px}
+.sysa .n3{left:1180px;top:280px}
+.sysa .n6{left:360px;top:640px}
+.sysa .n5{left:770px;top:640px}
+.sysa .n4{left:1180px;top:640px}
+.sysa .center{position:absolute;left:730px;top:566px;width:560px;text-align:center;font-size:27px;font-weight:900;color:#a8843a;letter-spacing:.06em}
+.sysa .back{position:absolute;left:446px;top:560px;width:260px;text-align:left!important;font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:700;color:#b23a2e;line-height:1.5;text-align:center}
+.sysa .base{position:absolute;left:50px;right:50px;top:956px;height:342px;background:#16213a;border-radius:16px;color:#fff;padding:22px 34px}
+.sysa .base .bt{font-size:27px;font-weight:900;color:#e9c979}
+.sysa .base .bt small{font-size:17px;color:#fff;font-weight:500;margin-left:14px;font-family:"Noto Sans JP",sans-serif}
+.sysa .cols{display:flex;gap:18px;margin-top:16px}
+.sysa .col{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(233,201,121,.35);border-radius:10px;padding:12px 16px;font-family:"Noto Sans JP","IPAPGothic",sans-serif}
+.sysa .col b{display:block;font-size:19px;color:#e9c979}
+.sysa .col span{font-size:14.5px;line-height:1.55;display:block;margin-top:4px;white-space:nowrap}
+.sysa .col.num{flex:.55;text-align:center}
+.sysa .col .up{color:#f0d894;font-size:14px;white-space:normal;margin-top:8px;border-top:1px dashed rgba(233,201,121,.4);padding-top:8px}
+.sysa .col:first-child{flex:1.1}
+.sysa .col.num b{font-size:15px;color:#fff}
+.sysa .col.num i{font-style:normal;font-size:26px;display:block;color:#e9c979;font-weight:900;font-family:"Noto Serif JP",serif}
+.sysa svg.wires{position:absolute;left:0;top:0;width:1600px;height:1330px;pointer-events:none}
+.sysa .tier{display:flex;gap:16px;align-items:stretch;margin-top:14px;flex-wrap:wrap}
+.sysa .tl{width:150px;border-radius:10px;background:#e9c979;color:#16213a;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:10px 6px}
+.sysa .tl b{font-size:20px;font-weight:900}
+.sysa .tl span{font-family:"Noto Sans JP",sans-serif;font-size:14px;font-weight:700;margin-top:4px}
+.sysa .tier.common .tl{background:rgba(255,255,255,.14);color:#fff}
+.sysa .blogs{flex:1;display:flex;gap:14px}
+.sysa .blog{flex:1;background:#fffdf9;color:#16213a;border-radius:10px;padding:12px 16px;position:relative;font-family:"Noto Sans JP",sans-serif}
+.sysa .blog i{position:absolute;right:12px;top:10px;font-style:normal;font-size:12px;font-weight:700;color:#a8843a;border:1px solid #d9c59a;border-radius:20px;padding:1px 9px}
+.sysa .blog b{display:block;font-size:20px;font-weight:900;font-family:"Noto Serif JP",serif}
+.sysa .blog span{display:block;font-size:13.5px;line-height:1.55;margin-top:5px;color:#3a4358;font-weight:500}
+.sysa .note{width:100%;margin-left:166px;font-family:"Noto Sans JP",sans-serif;font-size:14.5px;color:#f0d894;margin-top:-4px}
+.sysa .tier.common .cols{flex:1;margin-top:0}
+.sysa .col.wide{flex:1.7;display:flex;align-items:center}
+.sysa .col.wide .up{border:0;margin:0;padding:0}
+.sysa{margin:30px 0 6px}
+.sysa .sysa-pc{width:100%;aspect-ratio:1600/1330;overflow:hidden;border-radius:16px;position:relative;box-shadow:0 8px 26px rgba(20,30,60,.10);background:#f8f2ea}
+.sysa .sysa-sp .sysd{margin:0}
+@media (max-width:781px){.sysa .sysa-pc{display:none}}
+@media (min-width:782px){.sysa .sysa-sp{display:none}}
+</style>
+<div class="sysa-pc lpw-in"><div class="sysa-in">
+<div class="eyebrow">SYSTEM</div>
+<div class="h1">1本の道ではありません。<em>回り続ける仕組み</em>です。</div>
+<div class="sub">共通のルールと、ブログごとの専用の設定。2段の土台の上で、記事もルールも直し続けます。</div>
+
+<svg class="wires" viewBox="0 0 1600 1330">
+<defs><marker id="a" markerUnits="userSpaceOnUse" markerWidth="24" markerHeight="24" refX="18" refY="12" orient="auto"><path d="M4 3 L19 12 L4 21" fill="none" stroke="#a8843a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="r" markerUnits="userSpaceOnUse" markerWidth="24" markerHeight="24" refX="18" refY="12" orient="auto"><path d="M4 3 L19 12 L4 21" fill="none" stroke="#b23a2e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g stroke="#a8843a" stroke-width="3" fill="none" marker-end="url(#a)">
+<path d="M165 494 L165 552"/>
+<path d="M284 640 C322 640 318 405 352 405"/>
+<path d="M704 405 L762 405"/><path d="M1114 405 L1172 405"/>
+<path d="M1350 536 L1350 632"/>
+<path d="M1176 765 L1118 765"/><path d="M766 765 L708 765"/>
+</g>
+<path d="M424 636 L424 540" stroke="#b23a2e" stroke-width="3.4" fill="none" stroke-dasharray="2 9" stroke-linecap="round" marker-end="url(#r)"/>
+<g stroke="#c9b78f" stroke-width="1.6" stroke-dasharray="4 6">
+<path d="M165 794 L165 952"/><path d="M530 894 L530 952"/><path d="M940 894 L940 952"/><path d="M1350 894 L1350 952"/>
+</g>
+</svg>
+
+<div class="card you"><div class="lab">YOU</div><div class="t" style="margin-top:8px">あなた</div><div class="s">キーワードを<br>1行送るだけ</div></div>
+<div class="card cmd"><div class="lab">AI</div><div class="t" style="margin-top:8px">司令塔のAI</div><div class="s">Claudeが、どの道具を<br>どの順で使うかを決めて<br>全体を動かします</div></div>
+
+<div class="card node n1"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L21 21"/></svg></div><div class="lab">01</div><div class="t">調べる</div><div class="chips"><span>上位の記事</span><span>検索の候補</span><span>公式サイト</span><span>お店の情報</span></div></div>
+<div class="card node n2"><div class="ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 10h7M9 14h7M9 18h4"/></svg></div><div class="lab">02</div><div class="t">書く</div><div class="chips"><span>記事の型 11種類</span><span>あなたの話し方</span><span>日本語ルール</span></div></div>
+<div class="card node n3"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></div><div class="lab">03</div><div class="t">採点して、直す</div><div class="chips"><span>100点満点の採点</span><span>数字の食い違い</span><span>AIっぽい言い回し</span></div></div>
+<div class="card node n4"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg></div><div class="lab">04</div><div class="t">画像を作る</div><div class="chips"><span>アイキャッチ</span><span>図解</span><span>写真</span><span>4コマ漫画</span></div></div>
+<div class="card node n5"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg></div><div class="lab">05</div><div class="t">WordPressに届ける</div><div class="chips"><span>SWELL・Cocoonの飾り</span><span>下書きで保存</span></div></div>
+<div class="card node n6"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 6-8"/><path d="M14 6h4v4"/><path d="M3 21h18"/></svg></div><div class="lab">06</div><div class="t">Googleの数字を見る</div><div class="chips"><span>サーチコンソール</span><span>クリックが減った記事</span></div></div>
+
+<div style="position:absolute;left:300px;top:902px;width:520px;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;color:#b23a2e;background:#f8f2ea;padding:2px 8px;z-index:3">▼ 書き直すたびに「報告」が残り、ルール帳の直しの元になります</div>
+<div class="center">自分で回って、直し続ける</div>
+<div class="back">読まれなくなった記事を見つけて<br>もう一度、調べて書き直す</div>
+
+<div class="base"><div class="bt">土台は2段です<small>全員に共通のルールの上に、ブログごとの専用の段が乗ります</small></div>
+<div class="tier">
+<div class="tl"><b>ブログごとの段</b><span>あなた専用</span></div>
+<div class="blogs">
+<div class="blog"><i>例</i><b>料理のブログ</b><span>テーマ・読者・話し方／キーワードの一覧／書いた記録</span></div>
+<div class="blog"><i>例</i><b>旅行のブログ</b><span>テーマ・読者・話し方／キーワードの一覧／書いた記録</span></div>
+<div class="blog"><i>例</i><b>地域のお店のブログ</b><span>テーマ・読者・話し方／キーワードの一覧／書いた記録</span></div>
+</div>
+<div class="note">↻ ブログごとに別の担当AIがつきます。AIがそのブログを読んで設定を作り、記録はそのブログの中だけで増えていきます。</div>
+</div>
+<div class="tier common">
+<div class="tl"><b>共通の段</b><span>全員同じ</span></div>
+<div class="cols">
+<div class="col"><b>ルール帳（指示書）</b><span>日本語ルール・厳しめ採点表・記事の型</span></div>
+<div class="col wide"><span class="up">↻ 書き直しの報告から直す所を見つけ、作った本人が確かめてから足します。書き直しの指示書は46版まで改訂。新しい版は全員に自動で届きます。</span></div>
+<div class="col num"><b>Pythonの道具</b><i>45本</i></div>
+<div class="col num"><b>指示書・ルール</b><i>30本以上</i></div>
+</div></div>
+</div>
+</div></div>
+<div class="sysa-sp lpw-in">
+<div class="sysd">
 <style>
 .sysd{background:#f8f2ea;border-radius:16px;padding:34px 26px 28px;margin:30px 0 6px;color:#16213a;text-align:center;box-shadow:0 8px 26px rgba(20,30,60,.10);line-height:1.6}
 .sysd *{box-sizing:border-box}
@@ -63,4 +184,7 @@
 <div class="sy-p sy-up">↻ 書き直しの報告から直す所を見つけ、作った本人が確かめてから足します。書き直しの指示書は46版まで改訂。新しい版は全員に自動で届きます。</div>
 <div class="sy-nums"><div>Pythonの道具<b>45本</b></div><div>指示書・ルール<b>30本以上</b></div></div></div>
 </div>
+</div>
+</div>
+<script>(function(){var w=document.querySelector('.sysa-pc'),i=w&&w.querySelector('.sysa-in');if(!i)return;function f(){if(w.clientWidth)i.style.transform='scale('+(w.clientWidth/1600)+')'}f();window.addEventListener('resize',f);window.addEventListener('load',f)})();</script>
 </div>
