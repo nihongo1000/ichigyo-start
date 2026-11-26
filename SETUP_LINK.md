@@ -1,6 +1,6 @@
 # ichigyo 自動投稿：リンクから始まったクラウドの Claude への指示書
 
-版: 2026-11-26 v7.15（この行が無い古いファイルは使わない）
+版: 2026-11-26 v7.17（この行が無い古いファイルは使わない）
 
 あなた（Claude）は claude.ai/code のセッションの中にいる。お客さんは、購入時に渡されたリンクを押して Enter を押しただけ。
 最初の文に **合言葉** が入っている（2回目からは環境の設定 `ICHIGYO_PASS` に入っている）。公開リポジトリ `nihongo1000/ichigyo-start` には、この指示書・鍵のかかった部品 `ichigyo_set.enc`・記録の道具 `ichigyo_state.py`・Cocoon 用の置きかえの道具 `cocoon_convert.py` などがある。
@@ -362,7 +362,7 @@ cp $W/wp_auto/prompts/article_types/*.txt /home/user/ichigyo/tool/prompts/articl
     - 質問2（サーチコンソール）＝ つないだブログは A、それ以外は B。
     - 狙う語 ＝「任せる」（MD 2-7-4 の初めの形。すすめの語を主にして、元の語は守る語として本文に残す）。タイトルは変えない（15-0）。
     - 「GO」は待たない（上の答えを先に渡してあるので、止まらずに最後まで書く）。
-    - 報告の最初に「自動で決めた点」として、書き方の見分け・サーチコンソールの有無・狙う語を1行ずつ書く。続けて、直した記事の URL・足した見出し・文字数の前後・控えのファイル名を書く。お客さんが「元に戻して」と送ったら、控えの HTML を `wp_post.py update <ID> <控え.html>` で戻す。
+    - 報告の最初に「自動で決めた点」として、書き方の見分け・サーチコンソールの有無・狙う語を1行ずつ書く。続けて、直した記事の URL・足した見出し・文字数の前後・控えのファイル名を書く。お客さんが「元に戻して」と送ったら、先にR章の準備をしてから `python3 $W/wp_auto/scripts/wp_post.py restore <ID>`（どの記事か言われなければ、`rewrite_log.csv` のいちばん新しいリライトの記事）。道具が、この画面に残っている控え → 記録にしまった控え → WordPress の版の履歴（リビジョン）の順に、直す前の本文を探して戻す（控えのために記事や下書きを増やさない。直す前の版の番号は `rewrite/backup/index.csv` に残り、記録と一緒にしまわれるので、担当の画面が新しくなったあとの日でも戻せる）。`RESTORED id=<ID>` なら「〈タイトル〉を、手直しの前の本文に戻しました。」と1行。`RESTORE_SAME` なら「もう手直しの前の本文になっています。」。`RESTORE_NONE` なら、自分で本文を作り直さずに、「戻せる控えが見つかりませんでした。WordPress の編集画面の右の『リビジョン』から、前の版を選んで戻せます。」と返す。戻したあとは記録をしまう（`STATE_SAVED`）。
   - **調べる量は MD のとおり**（検索は5通り。数字・料金・日付は元のページで確かめる）。検索は WebSearch。外のページを読む所は `python3 $W/wp_auto/scripts/fact_fetch.py --keyword "<語>" --label "<kw_type.py の型の呼び名>" --ask "<確かめたい事>" --out $W/wp_auto/rewrite/work/facts_<ID>.md` に任せる（この画面の Claude は外のページを自分で開かない。0章）。`FACTS_NONE` のときは、数字・料金を足さない・直さない。確かめられなかった所は報告に「要確認」と書く。
   - **点検の設定（記事ごとの `gates_config.py`）**: 入れないと MD の点検が「測っていない（SKIP）」になり、いつも納品不可になる。`python3 $W/wp_auto/scripts/rewrite_gates.py sample $W/wp_auto/rewrite/work/<ID>_gates_config.py` で見本を作り、中の説明のとおりに入れる。
     - `LOCAL_MODE` は必ず True か False（タイトルが「〈地名〉 〈探す物〉」の形で、お店を並べた記事なら True）。
